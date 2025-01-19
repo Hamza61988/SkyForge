@@ -1,14 +1,19 @@
 import { motion } from "framer-motion";
 
+// Define props for FloatingParticles
+interface FloatingParticlesProps {
+  className?: string;
+}
+
 const particles = Array.from({ length: 20 }, (_, i) => ({
   id: i,
   x: Math.random() * 100 + "vw",
   y: Math.random() * 100 + "vh",
 }));
 
-export default function FloatingParticles() {
+export default function FloatingParticles({ className }: FloatingParticlesProps) {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className || ""}`}>
       {particles.map((p) => (
         <motion.div
           key={p.id}

@@ -1,5 +1,6 @@
 @import "@fontsource/manrope";
 @import "@fontsource/space-grotesk";
+@import "leaflet/dist/leaflet.css";
 
 @tailwind base;
 @tailwind components;

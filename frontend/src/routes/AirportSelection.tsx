@@ -48,11 +48,13 @@ export default function AirportSelection() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0A0A0A] text-gray-300 relative">
-      {/* Floating Particles Background */}
-      <FloatingParticles />
+      {/* Floating Particles Background - Moves Behind Everything */}
+      <FloatingParticles className="absolute inset-0 z-0 pointer-events-none" />
 
-      {/* Header */}
-      <Header />
+      {/* Header - Now Clickable */}
+      <div className="relative z-20">
+        <Header />
+      </div>
 
       {/* Main Content */}
       <div className="flex flex-col items-center justify-center flex-grow px-6 text-center relative z-10">
@@ -63,7 +65,7 @@ export default function AirportSelection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
         >
-          Select Your Airport
+          Where are you controlling?
         </motion.h1>
 
         {/* Input Field */}
@@ -82,7 +84,7 @@ export default function AirportSelection() {
 
           {/* Suggestions Dropdown */}
           {suggestions.length > 0 && (
-            <ul className="absolute z-10 bg-white text-black w-80 mt-1 rounded-lg shadow-md overflow-hidden">
+            <ul className="absolute z-30 bg-white text-black w-80 mt-1 rounded-lg shadow-md overflow-hidden">
               {suggestions.map((airport, index) => (
                 <li
                   key={index}
@@ -103,12 +105,14 @@ export default function AirportSelection() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          Confirm Airport
+          Confirm
         </motion.button>
       </div>
 
-      {/* Footer */}
-      <Footer />
+      {/* Footer - Now Clickable */}
+      <div className="relative z-20">
+        <Footer />
+      </div>
     </div>
   );
 }
