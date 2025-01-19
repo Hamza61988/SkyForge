@@ -8,8 +8,7 @@ import About from "./routes/About";
 import Changelog from "./routes/Changelog";
 import Products from "./routes/Products";
 import Join from "./routes/Join";
-
-
+import { useEffect } from "react";
 
 export default function App() {
   return (
@@ -24,17 +23,24 @@ export default function App() {
 function RoutesWithTransition() {
   const location = useLocation();
 
+  useEffect(() => {
+    document.title = "SkyForge"; 
+    const favicon = document.querySelector("link[rel='icon']");
+    if (favicon) {
+      favicon.setAttribute("href", "/sflogo.png"); 
+    }
+  }, []);
+
   return (
     <Routes location={location} key={location.pathname}>
       <Route path="/" element={<LandingPage />} />
       <Route path="/select-airport" element={<AirportSelection />} />
       <Route path="/callsigninput" element={<CallsignInput />} />
       <Route path="/gate-assignment" element={<GateAssignment />} />
-      <Route path="/changelog" element={<Changelog/>} />
+      <Route path="/changelog" element={<Changelog />} />
       <Route path="/products" element={<Products />} />
       <Route path="/join" element={<Join />} />
       <Route path="/about" element={<About />} />
-      
     </Routes>
   );
 }
