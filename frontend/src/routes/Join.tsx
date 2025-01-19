@@ -25,6 +25,8 @@ const Join: React.FC = () => {
           As SkyForge is a new project, I am the only person developing all the features and managing everything. 
           If you are interested in joining, it doesn't matter what role you would like to take—any help is welcome! 
           From software development to public management, your contribution would be greatly appreciated.
+
+          mikhaelmiro300@gmail.com - email me!
         </motion.p>
       </div>
       <Footer />

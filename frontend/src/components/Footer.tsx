@@ -22,10 +22,10 @@ export default function Footer() {
         <a href="https://discord.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500 transition-all">
           <FaDiscord />
         </a>
-        <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="hover:text-gray-400 transition-all">
+        <a href="https://github.com/SpaceMikha" target="_blank" rel="noopener noreferrer" className="hover:text-gray-400 transition-all">
           <FaGithub />
         </a>
-        <a href="mailto:contact@skyforge.com" className="hover:text-red-400 transition-all">
+        <a href="mailto:mikhelmiro300@gmail.com" className="hover:text-red-400 transition-all">
           <FaEnvelope />
         </a>
       </div>
