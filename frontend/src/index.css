@@ -1,13 +1,22 @@
+@import "@fontsource/manrope";
+@import "@fontsource/space-grotesk";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: #1a1a1a;
-    color: white;
-    text-align: center;
-  }
-  
+/* Smooth Moving Starfield Background */
+.bg-stars {
+  background: url("/stars.jpg"); 
+  background-size: cover;
+  background-repeat: repeat;
+  background-position: 0 0;
+  animation: moveStars 80s linear infinite; /* Slower, smoother loop */
+}
+
+/* Starfield Keyframes for a Seamless Loop */
+@keyframes moveStars {
+  0% { background-position: 0 0; }
+  50% { background-position: 50% 50%; }
+  100% { background-position: 100% 100%; }
+}
