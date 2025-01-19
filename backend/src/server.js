@@ -2,6 +2,9 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
+const API_KEY = process.env.OPENCAGE_API_KEY;
+
+
 const callsignRoutes = require("./routes/callsignRoutes");
 const gateRoutes = require("./routes/gateRoutes");
 
