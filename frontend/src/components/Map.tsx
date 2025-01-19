@@ -49,7 +49,7 @@ export default function Map({ departure, arrival }: { departure: string; arrival
   return (
     <MapContainer center={[20, 0]} zoom={3} style={{ height: "400px", width: "100%" }}>
       {/* Tile Layer for map background */}
-      <TileLayer url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png" />
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       
       {/* Draw a smooth curved line from departure to arrival */}
       {route.length > 0 && <Polyline positions={route} color="red" weight={3} smoothFactor={1.5} />}
