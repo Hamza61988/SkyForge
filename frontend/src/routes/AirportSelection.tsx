@@ -3,9 +3,10 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import airportsData from "../data/airports.json"; // Explicitly define type
+import FloatingParticles from "../components/FloatingParticles";
+import airportsData from "../data/airports.json"; // Local dataset
 
-// Define the type for the airport data
+// Define Airport Type
 interface Airport {
   ident: string; // ICAO Code
   name: string;  // Airport Name
@@ -19,6 +20,7 @@ export default function AirportSelection() {
   const [suggestions, setSuggestions] = useState<Airport[]>([]);
   const navigate = useNavigate();
 
+  // Filter Airport Suggestions Based on Input
   useEffect(() => {
     if (icao.length >= 2) {
       const filteredAirports = airports
@@ -38,19 +40,22 @@ export default function AirportSelection() {
 
   const handleSubmit = () => {
     if (icao.length === 4) {
-      navigate(`/assign-gate/${icao.toUpperCase()}`);
+      navigate(`/callsigninput?airport=${icao.toUpperCase()}`);
     } else {
       alert("Please enter a valid 4-letter ICAO code.");
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0A0A0A] text-gray-300">
+    <div className="min-h-screen flex flex-col bg-[#0A0A0A] text-gray-300 relative">
+      {/* Floating Particles Background */}
+      <FloatingParticles />
+
       {/* Header */}
       <Header />
 
       {/* Main Content */}
-      <div className="flex flex-col items-center justify-center flex-grow px-6 text-center">
+      <div className="flex flex-col items-center justify-center flex-grow px-6 text-center relative z-10">
         {/* Title */}
         <motion.h1
           className="text-5xl font-extrabold text-white tracking-wide font-heading"
