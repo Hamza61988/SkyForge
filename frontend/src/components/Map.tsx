@@ -50,9 +50,10 @@ export default function Map({ departure, arrival }: { departure: string; arrival
     <MapContainer center={[20, 0]} zoom={3} style={{ height: "400px", width: "100%" }}>
       {/* Tile Layer for map background */}
       <TileLayer
-  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+  attribution='&copy; <a href="https://opentopomap.org">OpenTopoMap</a> contributors'
 />
+
       
       {/* Draw a smooth curved line from departure to arrival */}
       {route.length > 0 && <Polyline positions={route} color="red" weight={3} smoothFactor={1.5} />}
