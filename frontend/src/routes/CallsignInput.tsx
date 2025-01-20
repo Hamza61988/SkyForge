@@ -177,12 +177,12 @@ export default function CallsignInput() {
       <Header />
 
       {/* Main Content */}
-      <div className="flex flex-grow px-8 py-6 mt-16">
+      <div className="flex flex-col md:flex-row flex-grow px-4 md:px-8 py-6 mt-16">
         {/* Left Panel: Flight Dispatch Information */}
-        <div className="w-2/5 bg-gray-900/50 backdrop-blur-md rounded-lg shadow-lg p-6 h-auto min-h-[450px] border border-gray-700">
+        <div className="w-full md:w-2/5 bg-gray-900/50 backdrop-blur-md rounded-lg shadow-lg p-6 border border-gray-700">
           <h1 className="text-3xl font-bold text-white">Ground Dispatch</h1>
 
-          <p className="mt-2 text-gray-400">
+          <p className="mt-2 text-gray-400 text-center md:text-left">
             Selected Airport: <span className="text-white font-bold">{airportICAO}</span>
           </p>
           {/* Callsign Input Field */}

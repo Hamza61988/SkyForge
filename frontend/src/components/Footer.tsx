@@ -3,7 +3,7 @@ import { FaDiscord, FaGithub, FaEnvelope } from "react-icons/fa";
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-gray-900/45 backdrop-blur-lg text-gray-300 py-3 px-10 flex justify-between items-center border-t border-gray-700 text-sm">
+    <footer className="w-full bg-gray-900/45 backdrop-blur-lg text-gray-300 py-3 px-4 md:px-10 flex flex-wrap justify-between items-center border-t border-gray-700">
       {/* Left: Clickable SkyForge Branding */}
       <div className="flex items-center gap-3">
         <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-all">
