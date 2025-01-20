@@ -12,7 +12,7 @@ export default function Header() {
   return (
     <header className="w-full bg-gray-900/45 backdrop-blur-lg text-gray-300 py-3 px-4 md:px-10 flex items-center justify-between border-b border-gray-700 relative">
       {/* Left: Clickable SkyForge Logo + Name */}
-      <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-all">
+      <Link to="/skyforge" className="flex items-center gap-3 hover:opacity-80 transition-all">
         <img src="/sflogo.png" alt="SkyForge Logo" className="w-10 h-10" />
         <h1 className="text-white text-2xl font-bold font-heading">SkyForge</h1>
       </Link>

@@ -8,6 +8,9 @@ import About from "./routes/About";
 import Changelog from "./routes/Changelog";
 import Products from "./routes/Products";
 import Join from "./routes/Join";
+import SkyForgeLanding from "./routes/SkyForge";
+
+
 import { useEffect } from "react";
 
 export default function App() {
@@ -41,6 +44,8 @@ function RoutesWithTransition() {
       <Route path="/products" element={<Products />} />
       <Route path="/join" element={<Join />} />
       <Route path="/about" element={<About />} />
+      <Route path="/skyforge" element={<SkyForgeLanding />} />
+
     </Routes>
   );
 }

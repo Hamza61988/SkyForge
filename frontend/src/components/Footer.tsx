@@ -6,7 +6,7 @@ export default function Footer() {
     <footer className="w-full bg-gray-900/45 backdrop-blur-lg text-gray-300 py-3 px-4 md:px-10 flex flex-wrap justify-between items-center border-t border-gray-700">
       {/* Left: Clickable SkyForge Branding */}
       <div className="flex items-center gap-3">
-        <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-all">
+        <Link to="/skyforge" className="flex items-center gap-3 hover:opacity-80 transition-all">
           <img src="/sflogo.png" alt="SkyForge Logo" className="w-8 h-8" />
           <h2 className="text-md font-semibold">SkyForge</h2>
         </Link>
