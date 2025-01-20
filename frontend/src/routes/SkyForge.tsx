@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import "../styles/background.css"; 
+import "../styles/skyforge-glow.css";
 
 const SkyForgeLanding: React.FC = () => {
   return (
@@ -17,12 +17,14 @@ const SkyForgeLanding: React.FC = () => {
         transition={{ duration: 1 }}
       >
         <motion.h1 
-          className="text-6xl font-extrabold mb-6 bg-gradient-to-r from-blue-400 to-purple-600 text-transparent bg-clip-text drop-shadow-lg leading-tight"
+          className="text-6xl font-extrabold mb-6 drop-shadow-lg leading-tight skyforge-glow"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.2 }}
         >
-          Welcome to SkyForge
+          <span className="text-white">Welcome to </span>
+          <span className="sky-glow">Sky</span>
+          <span className="forge-glow">Forge</span>
         </motion.h1>
         
         <motion.p 

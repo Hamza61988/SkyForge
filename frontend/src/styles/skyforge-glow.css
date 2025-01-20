@@ -1,0 +1,28 @@
+/* Base glow effect */
+.skyforge-glow {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+/* Sky (Pink) Glow Animation */
+.sky-glow {
+  color: #c024ff; 
+  text-shadow: 0 0 10px rgba(255, 102, 204, 0.8), 0 0 20px rgba(255, 102, 204, 0.6);
+  animation: skyGlowPulse 3s infinite alternate ease-in-out;
+}
+
+@keyframes skyGlowPulse {
+  0% { text-shadow: 0 0 10px rgba(255, 102, 204, 0.8); }
+  100% { text-shadow: 0 0 20px rgba(255, 102, 204, 1); }
+}
+
+/* Forge (Blue) Glow Animation */
+.forge-glow {
+  color: #7175fa; 
+  text-shadow: 0 0 10px rgba(102, 163, 255, 0.8), 0 0 20px rgba(102, 163, 255, 0.6);
+  animation: forgeGlowPulse 3s infinite alternate ease-in-out;
+}
+
+@keyframes forgeGlowPulse {
+  0% { text-shadow: 0 0 10px rgba(102, 163, 255, 0.8); }
+  100% { text-shadow: 0 0 20px rgba(102, 163, 255, 1); }
+}
