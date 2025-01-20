@@ -42,16 +42,31 @@ export default function Header() {
         </div>
       )}
 
-      {/* Right: Join Button (Always Visible) */}
-      <Link to="/join" className="hidden md:block">
-        <motion.button
-          className="px-5 py-2 bg-[#FF3131] text-white font-semibold rounded-lg shadow-md hover:bg-[#E02626] transition-all font-sans"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+      {/* Right: Join Button & Feedback Button (Always Visible) */}
+      <div className="hidden md:flex gap-4">
+        <Link to="/join">
+          <motion.button
+            className="px-5 py-2 bg-[#FF3131] text-white font-semibold rounded-lg shadow-md hover:bg-[#E02626] transition-all font-sans"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Join
+          </motion.button>
+        </Link>
+        <a
+          href="https://mail.google.com/mail/?view=cm&fs=1&to=your-email@gmail.com&su=SkyForge%20Feedback"
+          target="_blank"
+          rel="noopener noreferrer"
         >
-          Join
-        </motion.button>
-      </Link>
+          <motion.button
+            className="px-5 py-2 bg-[#007BFF] text-white font-semibold rounded-lg shadow-md hover:bg-[#0056b3] transition-all font-sans"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Give Your Feedback
+          </motion.button>
+        </a>
+      </div>
     </header>
   );
 }
