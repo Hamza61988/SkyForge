@@ -12,6 +12,7 @@
   "dependencies": {
     "@fontsource/manrope": "^5.1.1",
     "@fontsource/space-grotesk": "^5.1.1",
+    "@vercel/analytics": "^1.4.1",
     "arc": "^0.1.4",
     "axios": "^1.7.9",
     "framer-motion": "^11.18.1",
