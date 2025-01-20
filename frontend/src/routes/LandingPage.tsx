@@ -32,7 +32,7 @@ export default function LandingPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 1 }}
         >
-          Gate Assignment Assistant for Aurora
+          Gate Assignment Assistant for IVAO
         </motion.p>
 
         {/* Enter RunwayLink Button (Smaller + Gradient) with Fade-in & Pulsing Glow */}
