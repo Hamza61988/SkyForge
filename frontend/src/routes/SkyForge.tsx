@@ -84,7 +84,7 @@ const SkyForgeLanding: React.FC = () => {
           </div>
           <div className="p-6 bg-gray-800 rounded-lg shadow-lg">
             <h3 className="text-2xl font-semibold mb-4 text-white">Real-Time Weather System</h3>
-            <p className="text-gray-100">A hyper-realistic weather engine integrating real-world METAR and AI-generated turbulence.</p>
+            <p className="text-gray-100">A hyper-realistic weather engine (web-app integrated) integrating real-world METAR and AI-generated turbulence.</p>
           </div>
         </div>
       </motion.div>
