@@ -19,6 +19,7 @@ export default function Header() {
 
       {/* Desktop Navigation - Hidden on Mobile */}
       <nav className="hidden md:flex gap-8 text-lg font-medium">
+        <Link to="/skyforge" className="text-gray-300 hover:text-white transition-all">Home</Link>
         <Link to="/about" className="text-gray-300 hover:text-white transition-all">About</Link>
         <Link to="/changelog" className="text-gray-300 hover:text-white transition-all">Changelog</Link>
         <Link to="/products" className="text-gray-300 hover:text-white transition-all">Products</Link>
