@@ -80,7 +80,7 @@ export default function CallsignInput() {
     try {
       console.log(`📡 Fetching flight plan for callsign: ${callsign.toUpperCase()}`);
 
-      const response = await axios.get(`http://localhost:5000/api/aircraft/${callsign.toUpperCase()}`);
+      const response = await axios.get(`${API_URL}/api/aircraft/${callsign.toUpperCase()}`);
 
       if (response.status !== 200) {
         throw new Error(`API request failed with status ${response.status}`);
