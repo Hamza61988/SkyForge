@@ -10,6 +10,8 @@ import axios from "axios"; // For making requests
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 // Define Flight Plan Type
+
+
 interface FlightPlan {
   departure: string;
   arrival: string;
