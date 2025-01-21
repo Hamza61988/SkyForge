@@ -92,5 +92,5 @@ app.get("/api/aircraft/:callsign", async (req, res) => {
 
 // Start Server
 app.listen(PORT, () => {
-    console.log(`✅ Backend running on http://localhost:${PORT}`);
+    console.log(`✅ Backend running on http://0.0.0.0:${PORT}`);
 });
