@@ -7,7 +7,7 @@ import Map from "../components/Map"; // Flight route map
 import FloatingParticles from "../components/FloatingParticles"; // Background animation
 import axios from "axios"; // For making requests
 
-const API_URL = import.meta.env.VITE_BACKEND_URL;
+const API_URL = import.meta.env.VITE_BACKENDURL;
 
 // Define Flight Plan Type
 
