@@ -6,7 +6,15 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+// CORS configuration for both local and production frontends
+const corsOptions = {
+    origin: [
+        'https://runwaylink.vercel.app/', // Vercel frontend URL (production)
+        'http://localhost:5173' // Local frontend URL (development)
+    ]
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 const WHAZZUP_V2_URL = "https://api.ivao.aero/v2/tracker/whazzup"; // JSON API
@@ -47,15 +55,13 @@ app.get("/api/aircraft/:callsign", async (req, res) => {
     try {
         console.log(`📡 Fetching data for callsign: ${callsign}`);
 
-        // Fetch IVAO Whazzup Data
-        const response = await fetch("https://api.ivao.aero/v2/tracker/whazzup");
-        if (!response.ok) {
-            throw new Error(`IVAO API request failed with status ${response.status}`);
+        // Use cached Whazzup data
+        const whazzupData = await fetchWhazzupData();
+        if (!whazzupData) {
+            return res.status(500).json({ error: "Unable to fetch Whazzup data." });
         }
 
-        const data = await response.json();
-        const allCallsigns = data.clients.pilots.map(pilot => pilot.callsign);
-
+        const allCallsigns = whazzupData.clients.pilots.map(pilot => pilot.callsign);
         console.log("✅ Available Callsigns:", allCallsigns);
 
         // ✅ Find similar callsigns in the list
@@ -63,7 +69,7 @@ app.get("/api/aircraft/:callsign", async (req, res) => {
         console.log("🔍 Similar Callsigns Found:", similarCallsigns);
 
         // Search for exact callsign
-        const aircraft = data.clients.pilots.find(pilot => pilot.callsign.toUpperCase() === callsign.toUpperCase());
+        const aircraft = whazzupData.clients.pilots.find(pilot => pilot.callsign.toUpperCase() === callsign.toUpperCase());
 
         if (!aircraft) {
             console.warn(`⚠ Callsign '${callsign}' not found.`);
@@ -88,7 +94,6 @@ app.get("/api/aircraft/:callsign", async (req, res) => {
         res.status(500).json({ error: "Unexpected server error. Check logs for details." });
     }
 });
-
 
 // Start Server
 app.listen(PORT, () => {
