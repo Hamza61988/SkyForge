@@ -37,7 +37,7 @@ function RoutesWithTransition() {
   return (
     <Routes location={location} key={location.pathname}>
       <Route path="/" element={<SkyForgeLanding />} />
-      <Route path="/LandingPage" element={<LandingPage />} />
+      <Route path="/landingpage" element={<LandingPage />} />
       <Route path="/select-airport" element={<AirportSelection />} />
       <Route path="/callsigninput" element={<CallsignInput />} />
       <Route path="/gate-assignment" element={<GateAssignment />} />
