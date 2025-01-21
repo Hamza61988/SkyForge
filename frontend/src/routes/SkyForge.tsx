@@ -10,7 +10,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 const SkyForgeLanding: React.FC = () => {
   return (
-    <div className="relative flex flex-col min-h-screen bg-black text-white overflow-hidden" style={{ backgroundImage: "url('/public/sky.jpg')", backgroundSize: "cover", backgroundPosition: "center" }}>
+    <div className="relative flex flex-col min-h-screen bg-black text-white overflow-hidden" style={{ backgroundImage: "url('/sky.jpg')", backgroundSize: "cover", backgroundPosition: "center" }}>
       <Header />
 
       {/* Hero Section with Left Alignment & Advanced Animations */}
@@ -52,7 +52,7 @@ const SkyForgeLanding: React.FC = () => {
 
         {/* Static Rocket Fixed on Right Side, Lowered and Rotated 40 Degrees */}
         <div className="absolute right-20 top-3/4 transform -translate-y-1/2 rotate-[-40deg] w-96 h-96">
-          <img src="/public/rocket.jpg" alt="Rocket" className="w-full h-full" />
+          <img src="/rocket.jpg" alt="Rocket" className="w-full h-full" />
         </div>
       </div>
 
