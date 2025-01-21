@@ -9,11 +9,6 @@ import axios from "axios"; // For making requests
 
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
-fetch(`${API_URL}/your-endpoint`)
-  .then(response => response.json())
-  .then(data => console.log(data))
-  .catch(error => console.error("Error fetching data:", error));
-
 // Define Flight Plan Type
 interface FlightPlan {
   departure: string;
@@ -51,94 +46,7 @@ export default function CallsignInput() {
   const [searchParams] = useSearchParams();
   const airportICAO = searchParams.get("airport") || "No airport selected"; // Get ICAO from URL
 
-  // Fetch the flight plan using IVAO Whazzup API
-  const fetchFlightPlan = async () => {
-    if (!callsign) return;
-  
-    try {
-      console.log("Fetching flight plan for callsign:", callsign.toUpperCase());
-  
-      const response = await fetch("https://api.ivao.aero/v2/tracker/whazzup");
-  
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-  
-      const data = await response.json();
-  
-      if (!data || !data.clients || !data.clients.pilots) {
-        console.error("API response does not contain 'pilots'. Full response:", data);
-        alert("Error: Unable to fetch flight data. IVAO API might be down.");
-        return;
-      }
-  
-      console.log("Total Flights Fetched:", data.clients.pilots.length);
-  
-      const pilotData = data.clients.pilots.find(
-        (pilot: any) => pilot.callsign.toUpperCase() === callsign.toUpperCase()
-      );
-  
-      if (pilotData && pilotData.flightPlan) {
-        console.log("Flight Plan Found:", pilotData.flightPlan);
-  
-        const flightInfo = {
-          departure: pilotData.flightPlan.departureId || "Unknown",
-          arrival: pilotData.flightPlan.arrivalId || "Unknown",
-          aircraft: pilotData.flightPlan.aircraft.icaoCode || "Unknown",
-          route: pilotData.flightPlan.route || "Route not available"
-        };
-  
-        setFlightPlan(flightInfo);
-  
-        if (flightInfo.arrival === airportICAO) {
-          assignGate(flightInfo.arrival);
-        } else {
-          setAssignedGate("Not arriving at this airport.");
-        }
-      } else {
-        console.warn("Flight plan not found for callsign:", callsign.toUpperCase());
-        alert("Flight plan not found. Ensure the aircraft is online and has a flight plan.");
-      }
-    } catch (error) {
-      console.error("Error fetching flight plan:", error);
-      alert("Error fetching flight plan. Please check your internet connection or try again later.");
-    }
-  };
-
-  // Fetch the gates for the destination airport using OpenStreetMap (OSM)
-  const fetchGates = async (airportICAO: string) => {
-    try {
-      const coordinates = await fetchCoordinates(airportICAO);
-  
-      if (!coordinates) {
-        setAssignedGate("Unable to fetch coordinates for the airport.");
-        return [];
-      }
-  
-      const { lat, lng } = coordinates;
-  
-      // Updated Overpass API Query to fetch **ONLY gate numbers** (`ref` tag)
-      const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node["aeroway"="gate"]["ref"](around:5000,${lat},${lng});out;`;
-      console.log("Overpass API URL:", overpassUrl);
-  
-      const response = await axios.get(overpassUrl);
-  
-      console.log("Overpass API Response:", response.data);
-  
-      if (response.data && response.data.elements) {
-        return response.data.elements;
-      } else {
-        setAssignedGate("No gate numbers found.");
-        return [];
-      }
-    } catch (error) {
-      console.error("Error fetching gates:", error);
-      setAssignedGate("Error fetching gates.");
-      return [];
-    }
-  };
-
-  // Assign a gate based on **gate numbers (`ref` tag)**
+  // ✅ Move assignGate function above fetchFlightPlan to avoid "used before assigned" error
   const assignGate = async (arrivalICAO: string) => {
     if (arrivalICAO !== airportICAO) {
       setAssignedGate("Not arriving at this airport.");
@@ -159,6 +67,93 @@ export default function CallsignInput() {
       setAssignedGate(`Gate ${gateWithNumber.tags.ref}`);
     } else {
       setAssignedGate("No numeric gate numbers available.");
+    }
+  };
+
+  const fetchFlightPlan = async () => {
+    if (!callsign.trim()) {
+      console.error("❌ No callsign entered.");
+      alert("Please enter a callsign before fetching flight data.");
+      return;
+    }
+
+    try {
+      console.log(`📡 Fetching flight plan for callsign: ${callsign.toUpperCase()}`);
+
+      const response = await axios.get(`http://localhost:5000/api/aircraft/${callsign.toUpperCase()}`);
+
+      if (response.status !== 200) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const data = response.data;
+
+      if (!data) {
+        console.error("❌ API response is empty.");
+        alert("Error: Unable to fetch flight data.");
+        return;
+      }
+
+      console.log("✅ Flight Plan Data:", data);
+
+      setFlightPlan({
+        departure: data.departure || "Unknown",
+        arrival: data.destination || "Unknown",
+        aircraft: data.aircraft || "Unknown",
+        route: data.route || "Route not available"
+      });
+
+      // ✅ Now `assignGate` is defined before being used, fixing the error
+      if (data.destination === airportICAO) {
+        assignGate(data.destination);
+      } else {
+        setAssignedGate("Not arriving at this airport.");
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("❌ Error fetching flight plan:", error);
+        alert(`Error fetching flight plan: ${error.message}`);
+      } else {
+        console.error("❌ An unknown error occurred:", error);
+        alert("An unknown error occurred while fetching the flight plan.");
+      }
+    }
+  };
+
+  const fetchGates = async (airportICAO: string) => {
+    try {
+      const coordinates = await fetchCoordinates(airportICAO);
+
+      if (!coordinates) {
+        setAssignedGate("Unable to fetch coordinates for the airport.");
+        return [];
+      }
+
+      const { lat, lng } = coordinates;
+
+      // Overpass API Query to fetch gate numbers (`ref` tag)
+      const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node["aeroway"="gate"]["ref"](around:5000,${lat},${lng});out;`;
+      console.log("Overpass API URL:", overpassUrl);
+
+      const response = await axios.get(overpassUrl);
+
+      console.log("Overpass API Response:", response.data);
+
+      if (response.data && response.data.elements) {
+        return response.data.elements;
+      } else {
+        setAssignedGate("No gate numbers found.");
+        return [];
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("❌ Error fetching gates:", error);
+        setAssignedGate(`Error fetching gates: ${error.message}`);
+      } else {
+        console.error("❌ An unknown error occurred:", error);
+        setAssignedGate("An unknown error occurred while fetching gates.");
+      }
+      return [];
     }
   };
 
@@ -185,15 +180,18 @@ export default function CallsignInput() {
           <p className="mt-2 text-gray-400 text-center md:text-left">
             Selected Airport: <span className="text-white font-bold">{airportICAO}</span>
           </p>
+
           {/* Callsign Input Field */}
           <input
             type="text"
             placeholder="Enter Callsign (e.g., BAW123)"
             value={callsign}
-            onChange={(e) => setCallsign(e.target.value.toUpperCase())}
-            className="mt-4 px-4 py-2 w-full text-center text-white bg-gray-800 border border-gray-600 
-                      rounded-md shadow-md outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 
-                      transition-all duration-300 ease-in-out"
+            onChange={(e) => {
+              const input = e.target.value.toUpperCase();
+              setCallsign(input);
+              if (!input) console.warn("❌ Callsign is empty! API call will fail.");
+            }}
+            className="mt-4 px-4 py-2 w-full text-center text-white bg-gray-800 border border-gray-600 rounded-md shadow-md outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-300 ease-in-out"
           />
 
           {/* Fetch Flight Plan Button */}
@@ -214,17 +212,12 @@ export default function CallsignInput() {
               <p><strong>Assigned Gate:</strong> {assignedGate}</p>
             </div>
           )}
-          
-        </div>
-        {/* Right Panel: Interactive Map */}
-        <div className="w-3/5 flex justify-center items-center pl-6">
-          {flightPlan ? (
-            <Map departure={flightPlan.departure} arrival={flightPlan.arrival} />
-          ) : (
-            <p className="text-gray-400">Enter a callsign to display the flight path.</p>
-          )}
         </div>
 
+        {/* Right Panel: Interactive Map */}
+        <div className="w-3/5 flex justify-center items-center pl-6">
+          {flightPlan ? <Map callsign={callsign.toUpperCase()} /> : <p className="text-gray-400">Enter a callsign to display the flight path.</p>}
+        </div>
       </div>
 
       {/* Footer */}
