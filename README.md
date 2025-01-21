@@ -1,4 +1,4 @@
-# ✈️ SkyForge - Advanced ATC & Gate Assignment Tool
+# ✈️ SkyForge 
 
 
 RunwayLink is part of SkyForge.
