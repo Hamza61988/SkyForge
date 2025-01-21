@@ -90,7 +90,7 @@ const SkyForgeLanding: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 1.8 }}
         >
-          Learn More About RunwayLink
+          Learn More About Runway Link
         </motion.a>
       </motion.div>
 
