@@ -84,7 +84,7 @@ const SkyForgeLanding: React.FC = () => {
           Be our guest and check the first verision of Runway Link. this is an very early version of this product so expect some bugs. Please share your feedback with us so we can improve and add more features :)
         </p>
         <motion.a
-          href="/landingpage"
+          href="/Development"
           className="px-6 py-3 text-lg font-semibold text-white bg-gradient-to-r from-red-500 to-yellow-400 hover:scale-105 transition-all duration-300 rounded-lg shadow-lg"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
