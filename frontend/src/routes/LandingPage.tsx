@@ -36,7 +36,7 @@ export default function LandingPage() {
         </motion.p>
 
         {/* Enter RunwayLink Button (Smaller + Gradient) with Fade-in & Pulsing Glow */}
-        <Link to="/select-airport">
+        <Link to="/Development">
           <motion.div
             className="relative mt-8"
             initial={{ opacity: 0, y: 20 }}
