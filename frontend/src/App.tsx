@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import LandingPage from "./routes/LandingPage"; //  Fix import
 import AirportSelection from "./routes/AirportSelection";
@@ -37,8 +37,7 @@ function RoutesWithTransition() {
   return (
     <Routes location={location} key={location.pathname}>
       <Route path="/" element={<SkyForgeLanding />} />
-      <Route path="/landingpage" element={<LandingPage />} /> {/*  Ensure lowercase path */}
-      <Route path="/LandingPage" element={<Navigate to="/landingpage" replace />} /> {/*  Redirect uppercase to lowercase */}
+      <Route path="/landingpage" element={<LandingPage />} />
       <Route path="/select-airport" element={<AirportSelection />} />
       <Route path="/callsigninput" element={<CallsignInput />} />
       <Route path="/gate-assignment" element={<GateAssignment />} />
