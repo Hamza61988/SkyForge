@@ -1,9 +1,8 @@
-import { MapContainer, TileLayer, Polyline, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-
 
 interface AircraftData {
   callsign: string;
@@ -14,142 +13,80 @@ interface AircraftData {
   departure: string;
   destination: string;
   heading: number;
+  lastUpdated: number;
 }
 
 const IVAO_CLIENT_ID = import.meta.env.VITE_IVAO_CLIENT_ID;
 const IVAO_CLIENT_SECRET = import.meta.env.VITE_IVAO_CLIENT_SECRET;
 
-
-function parseLatLonWaypoint(waypoint: string): [number, number] | null {
-  const natRegex = /(\d{2})(N|S)(\d{3})(E|W)/;
-  const match = waypoint.match(natRegex);
-  if (!match) return null;
-
-  let lat = parseInt(match[1], 10);
-  let lon = parseInt(match[3], 10);
-
-  if (match[2] === "S") lat = -lat;
-  if (match[4] === "W") lon = -lon;
-
-  console.log(`🌍 Parsed NAT Waypoint: ${waypoint} → [${lat}, ${lon}]`);
-  return [lat, lon];
-}
-
-async function getWaypointCoordinates(waypoint: string, accessToken: string): Promise<[number, number] | null> {
-  try {
-    const response = await axios.get(`https://api.ivao.aero/v2/navaids/FIX?icao=${waypoint}`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    if (response.data && response.data.items.length > 0) {
-      return [response.data.items[0].latitude, response.data.items[0].longitude];
-    }
-  } catch (error) {
-    console.warn(`⚠ No coordinates found for waypoint: ${waypoint}`);
-  }
-  return null;
-}
-
 export default function Map({ callsign }: { callsign: string }) {
   const [aircraftData, setAircraftData] = useState<AircraftData | null>(null);
-  const [route, setRoute] = useState<[number, number][]>([]);
-  const [loading, setLoading] = useState(true); // ✅ Added loading state
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!callsign) return;
+  const fetchAircraftData = useCallback(async () => {
+    try {
+      if (!callsign) return;
+      console.log(`📡 Fetching real-time position for: ${callsign.toUpperCase()}`);
 
-    async function fetchAircraftData() {
-      try {
-        setLoading(true); // ✅ Show loading while fetching
+      setLoading(true);
 
-        const tokenResponse = await axios.post("https://api.ivao.aero/v2/oauth/token", {
-          grant_type: "client_credentials",
-          client_id: IVAO_CLIENT_ID,
-          client_secret: IVAO_CLIENT_SECRET,
-        });
+      // 🔑 Get OAuth Token for IVAO API
+      const tokenResponse = await axios.post("https://api.ivao.aero/v2/oauth/token", {
+        grant_type: "client_credentials",
+        client_id: IVAO_CLIENT_ID,
+        client_secret: IVAO_CLIENT_SECRET,
+      });
 
-        const accessToken = tokenResponse.data.access_token;
-        const response = await axios.get("https://api.ivao.aero/v2/tracker/whazzup", {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
+      const accessToken = tokenResponse.data.access_token;
 
-        const pilots = response.data.clients.pilots;
-        const aircraft = pilots.find((ac: any) => ac.callsign.trim().toUpperCase() === callsign.trim().toUpperCase());
-        if (!aircraft) return;
+      // 🔍 Fetch the aircraft based on the callsign
+      const response = await axios.get("https://api.ivao.aero/v2/tracker/whazzup", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
 
-        setAircraftData({
-          callsign: aircraft.callsign,
-          latitude: aircraft.lastTrack.latitude,
-          longitude: aircraft.lastTrack.longitude,
-          altitude: aircraft.lastTrack.altitude,
-          ground_speed: aircraft.lastTrack.groundSpeed,
-          departure: aircraft.flightPlan?.departureId || "Unknown",
-          destination: aircraft.flightPlan?.arrivalId || "Unknown",
-          heading: aircraft.lastTrack.heading || 0,
-        });
+      const pilots = response.data.clients.pilots;
+      const aircraft = pilots.find(
+        (ac: any) => ac.callsign.trim().toUpperCase() === callsign.trim().toUpperCase()
+      );
 
-        if (aircraft.flightPlan?.route) {
-          await fetchRouteWaypoints(aircraft.flightPlan.route, accessToken);
-        }
-
-        setLoading(false); // ✅ Hide loading when data is ready
-      } catch (error) {
-        console.error("❌ Error fetching aircraft data:", error);
-        setLoading(false); // ✅ Hide loading on error
+      if (!aircraft) {
+        console.warn(`⚠ No live data found for callsign: ${callsign}`);
+        setAircraftData(null);
+        setLoading(false);
+        return;
       }
-    }
 
-    fetchAircraftData();
-    const interval = setInterval(fetchAircraftData, 17000);
-    return () => clearInterval(interval);
+      console.log("✅ Live Aircraft Data:", aircraft);
+
+      // ✈️ Update aircraft state
+      setAircraftData({
+        callsign: aircraft.callsign,
+        latitude: aircraft.lastTrack.latitude,
+        longitude: aircraft.lastTrack.longitude,
+        altitude: aircraft.lastTrack.altitude,
+        ground_speed: aircraft.lastTrack.groundSpeed,
+        departure: aircraft.flightPlan?.departureId || "Unknown",
+        destination: aircraft.flightPlan?.arrivalId || "Unknown",
+        heading: aircraft.lastTrack.heading || 0,
+        lastUpdated: Date.now(),
+      });
+
+      setLoading(false);
+    } catch (error) {
+      console.error("❌ Error fetching aircraft data:", error);
+      setLoading(false);
+    }
   }, [callsign]);
 
-  function findNearestPointOnRoute(lat: number, lon: number, route: [number, number][]) {
-    let nearestPoint: [number, number] | null = null;
-    let minDistance = Infinity;
-
-    for (const [wpLat, wpLon] of route) {
-      const distance = Math.sqrt((lat - wpLat) ** 2 + (lon - wpLon) ** 2);
-      if (distance < minDistance) {
-        minDistance = distance;
-        nearestPoint = [wpLat, wpLon];
-      }
-    }
-
-    return nearestPoint;
-  }
-
-  async function fetchRouteWaypoints(routeString: string, accessToken: string) {
-    console.log("🔍 Extracting waypoints from route:", routeString);
-
-    const waypoints = routeString.split(" ")
-      .map(wp => wp.replace(/\/.*/, "")) // Remove altitudes/speeds
-      .filter(wp => /^[A-Z0-9]+$/.test(wp) && wp !== "DCT")
-      .filter((wp, index, self) => self.indexOf(wp) === index); // Remove duplicates
-
-    console.log("📍 Parsed waypoints:", waypoints);
-
-    let waypointCoords = await Promise.all(
-      waypoints.map(async (wp) => parseLatLonWaypoint(wp) || await getWaypointCoordinates(wp, accessToken))
-    );
-
-    let filteredCoords = waypointCoords.filter((coord): coord is [number, number] => coord !== null);
-    console.log("✅ Retrieved waypoint coordinates:", filteredCoords);
-
-    let cleanedRoute: [number, number][] = [];
-    for (let i = 0; i < filteredCoords.length; i++) {
-      if (i === 0 || i === filteredCoords.length - 1 ||
-        Math.sqrt((filteredCoords[i][0] - filteredCoords[i - 1][0]) ** 2 + (filteredCoords[i][1] - filteredCoords[i - 1][1]) ** 2) * 111 < 1500) {
-        cleanedRoute.push(filteredCoords[i]);
-      }
-    }
-
-    console.log("🛫 Final route coordinates:", cleanedRoute);
-    setRoute(cleanedRoute);
-  }
+  useEffect(() => {
+    fetchAircraftData(); // Fetch data immediately on mount
+    const interval = setInterval(fetchAircraftData, 15500); // Update every 15.5 seconds
+    return () => clearInterval(interval);
+  }, [fetchAircraftData]);
 
   return (
     <div style={{ position: "relative", width: "100%", height: "400px" }}>
-      {/* ✅ Loading indicator */}
+      {/* Loading Indicator */}
       {loading && (
         <div style={{
           position: "absolute",
@@ -171,35 +108,28 @@ export default function Map({ callsign }: { callsign: string }) {
           url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://opentopomap.org">OpenTopoMap</a> contributors'
         />
-        {!loading && route.length > 0 && <Polyline positions={route} color="red" weight={3} smoothFactor={1.5} />}
 
         {!loading && aircraftData && (
-          (() => {
-            const nearestPosition = findNearestPointOnRoute(
-              aircraftData.latitude,
-              aircraftData.longitude,
-              route
-            ) || [aircraftData.latitude, aircraftData.longitude];
-
-            return (
-              <Marker
-                position={nearestPosition}
-                icon={L.divIcon({
-                  className: "aircraft-icon",
-                  html: `<div style="
-                    transform: rotate(${aircraftData.heading}deg);
-                    display: flex; align-items: center; justify-content: center;
-                  ">
-                    <img src="/planevector.png" style="width: 32px; height: 32px;" />
-                  </div>`,
-                  iconSize: [32, 32],
-                  iconAnchor: [16, 16],
-                })}
-              >
-                <Popup><strong>{aircraftData.callsign}</strong></Popup>
-              </Marker>
-            );
-          })()
+          <Marker
+            position={[aircraftData.latitude, aircraftData.longitude]}
+            icon={L.divIcon({
+              className: "aircraft-icon",
+              html: `<div style="
+                transform: rotate(${aircraftData.heading}deg);
+                display: flex; align-items: center; justify-content: center;
+              ">
+                <img src="/planevector.png" style="width: 32px; height: 32px;" />
+              </div>`,
+              iconSize: [32, 32],
+              iconAnchor: [16, 16],
+            })}
+          >
+            <Popup>
+              <strong>{aircraftData.callsign}</strong> <br />
+              Altitude: {aircraftData.altitude} ft <br />
+              Speed: {aircraftData.ground_speed} kts
+            </Popup>
+          </Marker>
         )}
       </MapContainer>
     </div>

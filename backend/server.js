@@ -8,10 +8,7 @@ const PORT = process.env.PORT || 3000;
 
 // CORS configuration for both local and production frontends
 const corsOptions = {
-    origin: [
-        'https://runwaylink.vercel.app/', // Vercel frontend URL (production)
-        'http://localhost:5173' // Local frontend URL (development)
-    ]
+    origin: [/https:\/\/runwaylink\.vercel\.app/, /http:\/\/localhost:\d+/], // Allows any local port
 };
 
 app.use(cors(corsOptions));
@@ -62,7 +59,7 @@ app.get("/api/aircraft/:callsign", async (req, res) => {
         }
 
         const allCallsigns = whazzupData.clients.pilots.map(pilot => pilot.callsign);
-        console.log("✅ Available Callsigns:", allCallsigns);
+        //console.log("✅ Available Callsigns:", allCallsigns);
 
         // ✅ Find similar callsigns in the list
         const similarCallsigns = allCallsigns.filter(c => c.includes(callsign.substring(0, 3)));
