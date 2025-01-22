@@ -19,7 +19,7 @@ export default function Footer() {
 
       {/* Right: Social Media & Email Icons */}
       <div className="flex gap-5 text-lg">
-        <a href="https://discord.com" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500 transition-all">
+        <a href="https://discord.gg/AzRncugA" target="_blank" rel="noopener noreferrer" className="hover:text-blue-500 transition-all">
           <FaDiscord />
         </a>
         <a href="https://github.com/SpaceMikha" target="_blank" rel="noopener noreferrer" className="hover:text-gray-400 transition-all">
