@@ -8,7 +8,7 @@ import FloatingParticles from "../components/FloatingParticles";
 import axios from "axios";
 import { useEffect } from "react";
 
-const API_URL = import.meta.env.VITE_BACKENDURL;
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 // Define Flight Plan Type
 interface FlightPlan {
@@ -33,31 +33,25 @@ interface Gate {
   lon: number;
 }
 
-
-
-// OpenCage API Key
-
-// const VITE_GEONAMES_USERNAME = import.meta.env.GEONAMES_USERNAME; 
-
-// Fetch coordinates using OpenCage API
 const fetchCoordinates = async (airportICAO: string) => {
   try {
-    console.log(`📡 Fetching coordinates for ${airportICAO} using GeoNames API`);
+    console.log(`Fetching coordinates for ${airportICAO} using GeoNames API`);
 
     const response = await axios.get(
-      `https://secure.geonames.org/searchJSON?q=${airportICAO}&maxRows=1&username=${import.meta.env.VITE_GEONAMES_USERNAME}`
+      `https://secure.geonames.org/searchJSON?q=${airportICAO}&maxRows=1&username=${
+        import.meta.env.VITE_GEONAMES_USERNAME
+      }`
     );
-    
 
     if (response.data.geonames.length > 0) {
       const { lat, lng } = response.data.geonames[0];
-      console.log(`✅ Coordinates for ${airportICAO}:`, { lat, lng });
+      console.log(`Coordinates for ${airportICAO}:`, { lat, lng });
       return { lat, lon: lng };
     }
 
     console.warn(`⚠ No coordinates found for ${airportICAO}`);
   } catch (error) {
-    console.error("❌ Error fetching coordinates from GeoNames:", error);
+    console.error(" Error fetching coordinates from GeoNames:", error);
   }
 
   return null;
@@ -74,20 +68,23 @@ export default function CallsignInput() {
   const [searchParams] = useSearchParams();
   const airportICAO = searchParams.get("airport") || "No airport selected";
 
-  
   const [allGates, setAllGates] = useState<Gate[]>([]); // Store all gates
-  const [occupiedGates, setOccupiedGates] = useState<{ [key: string]: Gate }>({}); // Store occupied gates
-  
+  const [occupiedGates, setOccupiedGates] = useState<{ [key: string]: Gate }>(
+    {}
+  ); // Store occupied gates
+
   // Assigns the closest available gate for the callsign
   const releaseGate = (callsign: string) => {
     if (occupiedGates[callsign]) {
-      console.log(`🚪 Releasing Gate ${occupiedGates[callsign].ref} for Callsign ${callsign}`);
+      console.log(
+        `🚪 Releasing Gate ${occupiedGates[callsign].ref} for Callsign ${callsign}`
+      );
       setOccupiedGates((prev) => {
         const newGates = { ...prev };
         delete newGates[callsign]; // Remove the gate assignment
         return newGates;
       });
-  
+
       setActiveAircraft((prev) => {
         const newAircraft = { ...prev };
         delete newAircraft[callsign]; // Remove from active list
@@ -95,20 +92,24 @@ export default function CallsignInput() {
       });
     }
   };
-  
+
   useEffect(() => {
     const interval = setInterval(async () => {
       console.log("🔄 Checking for departed aircraft...");
-  
+
       for (const callsign of Object.keys(occupiedGates)) {
         try {
-          const response = await axios.get(`${API_URL}/api/aircraft/${callsign.toUpperCase()}`);
-  
+          const response = await axios.get(
+            `${API_URL}/api/aircraft/${callsign.toUpperCase()}`
+          );
+
           if (response.status === 200 && response.data) {
-            console.log(`✅ Aircraft ${callsign} is still active.`);
+            console.log(`Aircraft ${callsign} is still active.`);
             setActiveAircraft((prev) => ({ ...prev, [callsign]: true }));
           } else {
-            console.log(`⚠ Aircraft ${callsign} is no longer in IVAO data. Releasing gate.`);
+            console.log(
+              `⚠ Aircraft ${callsign} is no longer in IVAO data. Releasing gate.`
+            );
             releaseGate(callsign);
           }
         } catch (error) {
@@ -116,178 +117,186 @@ export default function CallsignInput() {
         }
       }
     }, 30000);
-  
+
     return () => clearInterval(interval);
   }, [occupiedGates]);
   
-  
 
   const assignGate = async (arrivalICAO: string, callsign: string) => {
+    if (!arrivalICAO || arrivalICAO === "Unknown") {
+        console.warn(`⚠ Flight Plan does not contain a valid arrival ICAO for ${callsign}`);
+        setAssignedGate("Invalid flight plan destination.");
+        setGateLocation(null);
+        return;
+    }
+
     if (arrivalICAO !== airportICAO) {
-      setAssignedGate("Not arriving at this airport.");
-      setGateLocation(null);
-      console.warn(`⚠ Aircraft ${callsign} is NOT arriving at ${airportICAO}.`);
-      return;
+        setAssignedGate("Not arriving at this airport.");
+        setGateLocation(null);
+        console.warn(`Aircraft ${callsign} is NOT arriving at ${airportICAO}.`);
+        return;
     }
-  
-    const gates: Gate[] = await fetchGatesFromOSM(arrivalICAO); // ✅ Now using OpenStreetMap
-  
+
+    const gates: Gate[] = await fetchGatesFromOSM(arrivalICAO);
+    
     if (!gates || gates.length === 0) {
-      setAssignedGate("No gates found for this airport.");
-      setGateLocation(null);
-      console.warn(`⚠ No gates found at ${arrivalICAO}.`);
-      return;
+        setAssignedGate("No gates found for this airport.");
+        setGateLocation(null);
+        console.warn(`⚠ No gates found at ${arrivalICAO}.`);
+        return;
     }
-  
+
     console.log("✅ Retrieved gates:", gates);
     setAllGates(gates);
-  
-    if (!activeAircraft[callsign]) {
-      console.log(`⚠ Aircraft ${callsign} is no longer active. Releasing gate.`);
-      releaseGate(callsign);
-      return;
-    }
-  
+
+    // ✅ Ensure that the callsign is tracked as active
+    setActiveAircraft((prev) => ({ ...prev, [callsign]: true }));
+
+    // 🔍 If the aircraft already has a gate assigned, keep it
     if (occupiedGates[callsign]) {
-      console.log(`🛬 Callsign ${callsign} already has an assigned gate.`);
-      setAssignedGate(`Gate ${occupiedGates[callsign].ref}`);
-      setGateLocation({ lat: occupiedGates[callsign].lat, lon: occupiedGates[callsign].lon });
-      return;
+        console.log(`🛬 Callsign ${callsign} already has an assigned gate.`);
+        setAssignedGate(`Gate ${occupiedGates[callsign].ref}`);
+        setGateLocation({ lat: occupiedGates[callsign].lat, lon: occupiedGates[callsign].lon });
+        return;
     }
-  
-    // Find the closest unassigned gate
+
+    // 🚨 Find the closest UNASSIGNED gate
     const availableGate = gates.find(
-      (gate) => !Object.values(occupiedGates).some((assigned) => assigned.ref === gate.ref)
+        (gate) => !Object.values(occupiedGates).some((assigned) => assigned.ref === gate.ref)
     );
-  
+
     if (!availableGate) {
-      console.warn("⚠ No available gates left.");
-      setAssignedGate("All gates are occupied.");
-      setGateLocation(null);
-      return;
+        console.warn("⚠ No available gates left.");
+        setAssignedGate("All gates are occupied.");
+        setGateLocation(null);
+        return;
     }
-  
+
     console.log(`🚪 Assigning Gate ${availableGate.ref} to Callsign ${callsign}`);
-  
-    // Update state to store occupied gates properly
+
+    // ✅ Update state to store occupied gates properly
     setOccupiedGates((prev) => {
-      const updatedGates = { ...prev, [callsign]: availableGate };
-      console.log("🔄 Updated occupied gates:", updatedGates);
-      return updatedGates;
+        const updatedGates = { ...prev, [callsign]: availableGate };
+        console.log("🔄 Updated occupied gates:", updatedGates);
+        return updatedGates;
     });
-  
+
     setAssignedGate(`Gate ${availableGate.ref}`);
     setGateLocation({ lat: availableGate.lat, lon: availableGate.lon });
-  
-    console.log(`✅ Assigned Gate: ${availableGate.ref}, Location: ${availableGate.lat}, ${availableGate.lon}`);
-  };
-  
-  
-  
-  
 
-  
-  
-  
-  const [activeAircraft, setActiveAircraft] = useState<{ [key: string]: boolean }>({});
+    console.log(`✅ Assigned Gate: ${availableGate.ref}, Location: ${availableGate.lat}, ${availableGate.lon}`);
+};
+
+
+  const [activeAircraft, setActiveAircraft] = useState<{
+    [key: string]: boolean;
+  }>({});
+  useEffect(() => {
+    console.log("✈️ Active Aircraft:", activeAircraft);
+}, [activeAircraft]);
   // Fetches flight plan data for the given callsign
   const fetchFlightPlan = async () => {
     if (!callsign.trim()) {
-      alert("Please enter a callsign before fetching flight data.");
-      return;
-    }
-  
-    try {
-      console.log(`📡 Fetching flight plan for callsign: ${callsign.toUpperCase()}`);
-      console.log(`🌍 Backend API URL: ${API_URL}`);
-  
-      const response = await axios.get(`${API_URL}/api/aircraft/${callsign.toUpperCase()}`);
-  
-      console.log("🔍 Full API Response:", response);
-  
-      if (response.status !== 200) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-  
-      const data = response.data;
-      console.log("✈️ Aircraft Data:", data);
-  
-      if (!data) {
-        alert("Error: Unable to fetch flight data.");
+        alert("Please enter a callsign before fetching flight data.");
         return;
-      }
-  
-      const aircraftType = data.aircraft || "Unknown";
-  
-      setFlightPlan({
-        departure: data.departure || "Unknown",
-        arrival: data.destination || "Unknown",
-        aircraft: aircraftType,
-        route: data.route || "Route not available",
-      });
-  
-      setActiveAircraft((prev) => ({ ...prev, [callsign]: true }));
-  
-      if (data.destination === airportICAO) {
-        assignGate(data.destination, callsign);
-      } else {
-        setAssignedGate("Not arriving at this airport.");
-      }
-    } catch (error) {
-      console.error("❌ Error fetching flight plan:", error);
-      alert("An error occurred while fetching the flight plan.");
     }
-  };
-  
-  
-  
+
+    try {
+        console.log(`📡 Fetching flight plan for callsign: ${callsign.toUpperCase()}`);
+
+        const response = await axios.get(`${API_URL}/api/aircraft/${callsign.toUpperCase()}`);
+        console.log("Full API Response:", response.data); // Debugging
+
+        if (response.status !== 200) {
+            throw new Error(`API request failed with status ${response.status}`);
+        }
+
+        const data = response.data;
+        if (!data) {
+            alert("Error: Unable to fetch flight data.");
+            return;
+        }
+
+        // Ensure Aircraft Type is Properly Set
+        const aircraftType = data.aircraft && typeof data.aircraft === "string"
+            ? data.aircraft
+            : "Unknown";
+
+        setFlightPlan({
+            departure: data.departure || "Unknown",
+            arrival: data.destination || "Unknown",
+            aircraft: aircraftType,
+            route: data.route || "Route not available",
+        });
+
+        if (data.destination === airportICAO) {
+            assignGate(data.destination, callsign);
+        } else {
+            setAssignedGate("Not arriving at this airport.");
+        }
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            console.error("Error fetching flight plan:", error.message);
+            if (error.response?.status === 404) {
+                alert(`⚠ Aircraft '${callsign}' not found.`);
+            } else if (error.response?.status === 500) {
+                alert("🚨 Internal Server Error. Try again later.");
+            } else {
+                alert(`An error occurred: ${error.message}`);
+            }
+        } else {
+            console.error("Unexpected error:", error);
+            alert("An unexpected error occurred.");
+        }
+    }
+};
+
 
   // Fetches available gates at the airport
   const fetchGatesFromOSM = async (airportICAO: string) => {
     try {
-      console.log(`📡 Fetching airport coordinates for ${airportICAO} using OpenStreetMap`);
-  
       // Convert ICAO code to coordinates using GeoNames (fallback)
       const coordinates = await fetchCoordinates(airportICAO);
-  
+
       if (!coordinates) {
-        console.warn("⚠ Failed to fetch airport coordinates.");
         return [];
       }
-  
+
       const { lat, lon } = coordinates;
-  
+
       // Overpass API query to get gates
       const overpassQuery = `
         [out:json];
         node["aeroway"="gate"](around:5000, ${lat}, ${lon});
         out;
       `;
-      const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
-  
-      console.log(`🛰 Querying Overpass API: ${overpassUrl}`);
-  
+      const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(
+        overpassQuery
+      )}`;
+
+      console.log(`Querying Overpass API: ${overpassUrl}`);
+
       const response = await axios.get(overpassUrl, { timeout: 10000 });
-  
+
       if (!response.data?.elements?.length) {
         console.warn(`⚠ No gates found for ${airportICAO}.`);
         return [];
       }
-  
-      console.log(`✅ Found ${response.data.elements.length} gates at ${airportICAO}`);
-  
+
+      console.log(
+        `Found ${response.data.elements.length} gates at ${airportICAO}`
+      );
+
       return response.data.elements.map((g: any) => ({
         ref: g.tags?.ref ?? "Unknown",
         lat: g.lat,
         lon: g.lon,
       }));
     } catch (error) {
-      console.error("❌ Error fetching gates from OpenStreetMap:", error);
+      console.error("Error fetching gates from OpenStreetMap:", error);
       return [];
     }
   };
-  
-  
 
   return (
     <motion.div className="min-h-screen flex flex-col bg-[#0A0A0A] text-gray-300 relative px-6">
@@ -350,11 +359,11 @@ export default function CallsignInput() {
         <div className="w-3/5 flex justify-center items-center pl-6">
           {flightPlan ? (
             <Map
-            callsign={callsign.toUpperCase()}
-            gateLocation={gateLocation}
-            allGates={allGates} //  Pass all gates
-            occupiedGates={occupiedGates} //  Pass occupied gates
-          />
+              callsign={callsign.toUpperCase()}
+              gateLocation={gateLocation}
+              allGates={allGates} //  Pass all gates
+              occupiedGates={occupiedGates} //  Pass occupied gates
+            />
           ) : (
             <p className="text-gray-400">
               Enter a callsign to display the flight path.

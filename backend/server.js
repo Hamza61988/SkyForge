@@ -6,94 +6,111 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS configuration for both local and production frontends
 const corsOptions = {
-    origin: [/https:\/\/runwaylink\.vercel\.app/, /http:\/\/localhost:\d+/], // Allows any local port
+  origin: [/https:\/\/runwaylink\.vercel\.app/, /http:\/\/localhost:\d+/],
 };
 
 app.use(cors(corsOptions));
 app.use(express.json());
 
-const WHAZZUP_V2_URL = "https://api.ivao.aero/v2/tracker/whazzup"; // JSON API
+const WHAZZUP_V2_URL = "https://api.ivao.aero/v2/tracker/whazzup";
 
-let whazzupData = null;  // Cache for Whazzup data
-let lastFetched = 0;  // Timestamp of last fetch
+const client_id = process.env.IVAO_CLIENT_ID;
+const client_secret = process.env.IVAO_CLIENT_SECRET;
 
-// Function to Fetch Whazzup Data (IMPORTANT: Max Once per 15s TO AVOID IP BAN)
-async function fetchWhazzupData() {
-    const now = Date.now();
+let accessToken = null;
+let tokenExpiration = 0;
 
-    if (whazzupData && now - lastFetched < 15000) {
-        console.log("⏳ Using Cached Whazzup Data");
-        return whazzupData;
+// Securely Fetch OAuth Token
+async function fetchOAuthToken() {
+  const now = Date.now();
+
+  if (accessToken && now < tokenExpiration) {
+    console.log("Using cached OAuth token");
+    return accessToken;
+  }
+
+  try {
+    console.log("Requesting new OAuth token from IVAO...");
+
+    const response = await axios.post(
+      "https://api.ivao.aero/v2/oauth/token",
+      new URLSearchParams({
+        grant_type: "client_credentials",
+        client_id: client_id,
+        client_secret: client_secret,
+      }),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+
+    if (!response.data.access_token) {
+      throw new Error("No access token returned from IVAO.");
     }
 
-    try {
-        console.log("📡 Fetching New Whazzup Data...");
-        const response = await axios.get(WHAZZUP_V2_URL);
-        whazzupData = response.data;  // Store JSON response
-        lastFetched = now;
-        return whazzupData;
-    } catch (error) {
-        console.error("❌ Error Fetching Whazzup Data:", error.message);
-        return null;
-    }
+    accessToken = response.data.access_token;
+    tokenExpiration = now + response.data.expires_in * 1000;
+
+    console.log("✅ OAuth token obtained successfully!");
+    return accessToken;
+  } catch (error) {
+    console.error("OAuth Token Fetch Failed:");
+    console.error("Status:", error.response?.status);
+    console.error("Response:", error.response?.data);
+    console.error("Message:", error.message);
+    return null;
+  }
 }
 
-// Get Aircraft Data from Whazzup JSON
+// Secure Endpoint: Get Aircraft Data
 app.get("/api/aircraft/:callsign", async (req, res) => {
-    const { callsign } = req.params;
+  const { callsign } = req.params;
+  if (!callsign) {
+    return res.status(400).json({ error: "Missing callsign." });
+  }
 
-    if (!callsign || callsign === "undefined") {
-        console.error("❌ API Error: Missing or invalid callsign");
-        return res.status(400).json({ error: "Missing or invalid callsign." });
+  const token = await fetchOAuthToken();
+  if (!token) {
+    return res.status(500).json({ error: "Unable to obtain OAuth token." });
+  }
+
+  try {
+    const response = await axios.get(WHAZZUP_V2_URL, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const pilots = response.data.clients.pilots;
+    const aircraft = pilots.find(
+      (p) => p.callsign.toUpperCase() === callsign.toUpperCase()
+    );
+
+    if (!aircraft) {
+      return res
+        .status(404)
+        .json({ error: `Aircraft '${callsign}' not found.` });
     }
 
-    try {
-        console.log(`📡 Fetching data for callsign: ${callsign}`);
-
-        // Use cached Whazzup data
-        const whazzupData = await fetchWhazzupData();
-        if (!whazzupData) {
-            return res.status(500).json({ error: "Unable to fetch Whazzup data." });
-        }
-
-        const allCallsigns = whazzupData.clients.pilots.map(pilot => pilot.callsign);
-        //console.log("✅ Available Callsigns:", allCallsigns);
-
-        // ✅ Find similar callsigns in the list
-        const similarCallsigns = allCallsigns.filter(c => c.includes(callsign.substring(0, 3)));
-        console.log("🔍 Similar Callsigns Found:", similarCallsigns);
-
-        // Search for exact callsign
-        const aircraft = whazzupData.clients.pilots.find(pilot => pilot.callsign.toUpperCase() === callsign.toUpperCase());
-
-        if (!aircraft) {
-            console.warn(`⚠ Callsign '${callsign}' not found.`);
-            return res.status(404).json({ 
-                error: `Aircraft '${callsign}' not found. Try one of these instead: ${similarCallsigns.join(", ") || "No similar callsigns found."}` 
-            });
-        }
-
-        res.json({
-            callsign: aircraft.callsign,
-            latitude: aircraft.lastTrack.latitude,
-            longitude: aircraft.lastTrack.longitude,
-            altitude: aircraft.lastTrack.altitude,
-            ground_speed: aircraft.lastTrack.groundSpeed,
-            departure: aircraft.flightPlan ? aircraft.flightPlan.departureId : "Unknown",
-            destination: aircraft.flightPlan ? aircraft.flightPlan.arrivalId : "Unknown",
-            route: aircraft.flightPlan ? aircraft.flightPlan.route : "No Route",
-            aircraft: aircraft.flightPlan?.aircraft || "Unknown" 
-        });
-
-    } catch (error) {
-        console.error("❌ Server Error:", error);
-        res.status(500).json({ error: "Unexpected server error. Check logs for details." });
-    }
+    res.json({
+        callsign: aircraft.callsign,
+        latitude: aircraft.lastTrack?.latitude ?? null,
+        longitude: aircraft.lastTrack?.longitude ?? null,
+        altitude: aircraft.lastTrack?.altitude ?? 0,
+        ground_speed: aircraft.lastTrack?.groundSpeed ?? 0,
+        departure: aircraft.flightPlan?.departureId?.toUpperCase() ?? "Unknown",
+        destination: aircraft.flightPlan?.arrivalId?.toUpperCase() ?? "Unknown",
+        route: aircraft.flightPlan?.route ?? "No Route",
+        heading: aircraft.lastTrack?.heading ?? 0,
+        aircraft: aircraft.flightPlan?.aircraftId ?? "Unknown",  
+    });
+  } catch (error) {
+    console.error("Error Fetching Aircraft Data:", error.message);
+    res.status(500).json({ error: "Unexpected server error." });
+  }
 });
 
-// Start Server
 app.listen(PORT, () => {
-    console.log(`✅ Backend running on http://0.0.0.0:${PORT}`);
+  console.log(`Backend running on port ${PORT}`);
 });
