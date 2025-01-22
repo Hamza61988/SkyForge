@@ -11,9 +11,10 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import axios from "axios";
 import * as turf from "@turf/turf"; // Import Turf.js for geodesic calculations
 
-const API_KEY = import.meta.env.VITE_OPENCAGE_API_KEY; // OpenCage API for airport coordinates
 const IVAO_CLIENT_ID = import.meta.env.VITE_IVAO_CLIENT_ID;
 const IVAO_CLIENT_SECRET = import.meta.env.VITE_IVAO_CLIENT_SECRET;
+const GEONAMES_USERNAME = import.meta.env.GEONAMES_USERNAME; 
+
 
 interface AircraftData {
   callsign: string;
@@ -43,23 +44,32 @@ export default function Map({
   const [loading, setLoading] = useState(true);
   const mapRef = useRef<L.Map | null>(null);
 
+
+
   // Fetch Airport Coordinates
-  const fetchAirportCoordinates = async (icao: string) => {
-    try {
-      const response = await axios.get(
-        `https://api.opencagedata.com/geocode/v1/json?q=${icao}&key=${API_KEY}`
-      );
-      if (response.data.results.length > 0) {
-        return {
-          lat: response.data.results[0].geometry.lat,
-          lon: response.data.results[0].geometry.lng,
-        };
-      }
-    } catch (error) {
-      console.error(`❌ Error fetching coordinates for ${icao}:`, error);
+
+const fetchAirportCoordinates = async (icao: string) => {
+  try {
+    console.log(`📡 Fetching coordinates for ${icao} using GeoNames API`);
+
+    const response = await axios.get(
+      `http://api.geonames.org/searchJSON?q=${icao}&maxRows=1&username=${GEONAMES_USERNAME}`
+    );
+
+    if (response.data.geonames.length > 0) {
+      const { lat, lng } = response.data.geonames[0];
+      console.log(`✅ Coordinates for ${icao}:`, { lat, lng });
+      return { lat, lon: lng };
     }
-    return null;
-  };
+
+    console.warn(`⚠ No coordinates found for ${icao}`);
+  } catch (error) {
+    console.error("❌ Error fetching coordinates from GeoNames:", error);
+  }
+
+  return null;
+};
+
 
   // Fetch Aircraft Data from IVAO API
   const fetchAircraftData = useCallback(async () => {

@@ -36,22 +36,29 @@ interface Gate {
 
 
 // OpenCage API Key
-const API_KEY = import.meta.env.VITE_OPENCAGE_API_KEY;
+
+const GEONAMES_USERNAME = "mikha"
 
 // Fetch coordinates using OpenCage API
 const fetchCoordinates = async (airportICAO: string) => {
   try {
+    console.log(`📡 Fetching coordinates for ${airportICAO} using GeoNames API`);
+
     const response = await axios.get(
-      `https://api.opencagedata.com/geocode/v1/json?q=${airportICAO}&key=${API_KEY}`
+      `http://api.geonames.org/searchJSON?name=${airportICAO}&maxRows=1&username=${GEONAMES_USERNAME}`
     );
 
-    if (response.data.results.length > 0) {
-      const { lat, lng } = response.data.results[0].geometry;
+    if (response.data.geonames.length > 0) {
+      const { lat, lng } = response.data.geonames[0];
+      console.log(`✅ Coordinates for ${airportICAO}:`, { lat, lng });
       return { lat, lng };
     }
+
+    console.warn(`⚠ No coordinates found for ${airportICAO}`);
   } catch (error) {
-    console.error(" Error fetching coordinates:", error);
+    console.error("❌ Error fetching coordinates from GeoNames:", error);
   }
+
   return null;
 };
 
@@ -236,27 +243,30 @@ export default function CallsignInput() {
   // Fetches available gates at the airport
   const fetchGates = async (airportICAO: string) => {
     try {
-      const coordinates = await fetchCoordinates(airportICAO);
+      console.log(`📡 Fetching coordinates for ${airportICAO}`);
+      const coordinates = await fetchCoordinates(airportICAO); // Now using GeoNames
+  
       if (!coordinates) {
-        console.warn("⚠ Failed to fetch airport coordinates");
+        console.warn("⚠ Failed to fetch airport coordinates.");
         return [];
       }
   
       const { lat, lng } = coordinates;
       const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node["aeroway"="gate"]["ref"](around:5000,${lat},${lng});out;`;
   
-      console.log("🛰 Fetching gates from Overpass API:", overpassUrl);
+      console.log(`🛰 Querying Overpass API: ${overpassUrl}`);
   
-      const response = await axios.get(overpassUrl);
+      const response = await axios.get(overpassUrl, { timeout: 10000 });
+  
       console.log("✅ Overpass API Response:", response.data);
   
       if (!response.data?.elements?.length) {
-        console.warn("⚠ No gate data found.");
+        console.warn(`⚠ No gates found for ${airportICAO}.`);
         return [];
       }
   
       return response.data.elements.map((g: any) => ({
-        ref: g.tags?.ref ?? "",
+        ref: g.tags?.ref ?? "Unknown",
         lat: g.lat,
         lon: g.lon,
       }));
@@ -265,6 +275,7 @@ export default function CallsignInput() {
       return [];
     }
   };
+  
   
 
   return (
