@@ -3,7 +3,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import * as turf from "@turf/turf"; // 🛰 Import Turf.js for geodesic calculations
+import * as turf from "@turf/turf"; //  Import Turf.js for geodesic calculations
 
 const API_KEY = import.meta.env.VITE_OPENCAGE_API_KEY; // OpenCage API for airport coordinates
 const IVAO_CLIENT_ID = import.meta.env.VITE_IVAO_CLIENT_ID;
@@ -45,7 +45,7 @@ export default function Map({ callsign }: { callsign: string }) {
     return null;
   };
 
-  // ✈️ Fetch Aircraft Data from IVAO API
+  //  Fetch Aircraft Data from IVAO API
   const fetchAircraftData = useCallback(async () => {
     try {
       if (!callsign) return;
@@ -53,7 +53,7 @@ export default function Map({ callsign }: { callsign: string }) {
   
       setLoading(true);
   
-      // 🔑 Get OAuth Token for IVAO API
+      //  Get OAuth Token for IVAO API
       const tokenResponse = await axios.post("https://api.ivao.aero/v2/oauth/token", {
         grant_type: "client_credentials",
         client_id: IVAO_CLIENT_ID,
@@ -79,7 +79,7 @@ export default function Map({ callsign }: { callsign: string }) {
         return;
       }
   
-      console.log("✅ Live Aircraft Data:", aircraft);
+      console.log(" Live Aircraft Data:", aircraft);
   
       // ✈️ Update aircraft state
       const aircraftInfo: AircraftData = {
@@ -118,7 +118,7 @@ export default function Map({ callsign }: { callsign: string }) {
     }
   }, [callsign]);
 
-  // 🌍 Generate Great Circle Route Using Turf.js
+  //  Generate Great Circle Route Using Turf.js
   const generateGreatCircleRoute = async (
     departureICAO: string,
     destinationICAO: string,
@@ -136,12 +136,12 @@ export default function Map({ callsign }: { callsign: string }) {
       return;
     }
   
-    // 🌎 Compute Great Circle Line
+    //  Compute Great Circle Line
     const start = turf.point([depCoords.lon, depCoords.lat]);
     const end = turf.point([destCoords.lon, destCoords.lat]);
     const greatCircle = turf.greatCircle(start, end, { npoints: 50 });
   
-    // ✅ Ensure coordinates are `[number, number]`
+    //  Ensure coordinates are `[number, number]`
     let routeCoords: [number, number][] = greatCircle.geometry.coordinates
       .map(coord => {
         if (Array.isArray(coord) && coord.length === 2 && typeof coord[0] === 'number' && typeof coord[1] === 'number') {
@@ -151,7 +151,7 @@ export default function Map({ callsign }: { callsign: string }) {
       })
       .filter((coord): coord is [number, number] => coord !== null);
   
-    // 🛫 Adjust route to enter and exit smoothly around the aircraft
+    //  Adjust route to enter and exit smoothly around the aircraft
     if (aircraftLat !== undefined && aircraftLon !== undefined) {
       console.log(`📍 Adjusting route to pass under aircraft at [${aircraftLat}, ${aircraftLon}]`);
   
@@ -168,7 +168,7 @@ export default function Map({ callsign }: { callsign: string }) {
         }
       });
   
-      // ✅ Ensure aircraft position and airports are correctly typed
+      //  Ensure aircraft position and airports are correctly typed
       const aircraftPoint: [number, number] = [aircraftLat, aircraftLon];
       const departurePoint: [number, number] = [depCoords.lat, depCoords.lon];
       const destinationPoint: [number, number] = [destCoords.lat, destCoords.lon];
@@ -180,7 +180,7 @@ export default function Map({ callsign }: { callsign: string }) {
         destinationPoint // Directly continue to the destination
       ];
   
-      console.log(`✅ Adjusted route now smoothly enters and exits around the aircraft`);
+      
       setRoute(adjustedRoute);
     } else {
       setRoute(routeCoords); // Keep the original route if no aircraft data
@@ -189,7 +189,7 @@ export default function Map({ callsign }: { callsign: string }) {
   
   
 
-  // 📍 Calculate Heading from Aircraft to Destination
+  //  Calculate Heading from Aircraft to Destination
   const calculateAircraftHeading = async (
     aircraftLat: number,
     aircraftLon: number,
@@ -200,9 +200,9 @@ export default function Map({ callsign }: { callsign: string }) {
 
     const start = turf.point([aircraftLon, aircraftLat]);
     const end = turf.point([destCoords.lon, destCoords.lat]);
-    const bearing = turf.bearing(start, end); // 🔥 Get bearing from aircraft to destination
+    const bearing = turf.bearing(start, end); //  Get bearing from aircraft to destination
 
-    console.log(`🧭 Aircraft Bearing to Destination: ${bearing}°`);
+    console.log(` Aircraft Bearing to Destination: ${bearing}°`);
     setAircraftHeading(bearing);
   };
 

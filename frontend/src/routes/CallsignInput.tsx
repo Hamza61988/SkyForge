@@ -48,7 +48,7 @@ export default function CallsignInput() {
   const [searchParams] = useSearchParams();
   const airportICAO = searchParams.get("airport") || "No airport selected"; // Get ICAO from URL
 
-  // ✅ Move assignGate function above fetchFlightPlan to avoid "used before assigned" error
+  //  Move assignGate function above fetchFlightPlan to avoid "used before assigned" error
   const assignGate = async (arrivalICAO: string) => {
     if (arrivalICAO !== airportICAO) {
       setAssignedGate("Not arriving at this airport.");
@@ -96,7 +96,7 @@ export default function CallsignInput() {
         return;
       }
 
-      console.log("✅ Flight Plan Data:", data);
+      
 
       setFlightPlan({
         departure: data.departure || "Unknown",
@@ -105,7 +105,7 @@ export default function CallsignInput() {
         route: data.route || "Route not available"
       });
 
-      // ✅ Now `assignGate` is defined before being used, fixing the error
+      //  Now `assignGate` is defined before being used, fixing the error
       if (data.destination === airportICAO) {
         assignGate(data.destination);
       } else {
@@ -113,10 +113,10 @@ export default function CallsignInput() {
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
-        console.error("❌ Error fetching flight plan:", error);
+        console.error(" Error fetching flight plan:", error);
         alert(`Error fetching flight plan: ${error.message}`);
       } else {
-        console.error("❌ An unknown error occurred:", error);
+        console.error(" An unknown error occurred:", error);
         alert("An unknown error occurred while fetching the flight plan.");
       }
     }
@@ -149,10 +149,10 @@ export default function CallsignInput() {
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
-        console.error("❌ Error fetching gates:", error);
+        console.error(" Error fetching gates:", error);
         setAssignedGate(`Error fetching gates: ${error.message}`);
       } else {
-        console.error("❌ An unknown error occurred:", error);
+        console.error(" An unknown error occurred:", error);
         setAssignedGate("An unknown error occurred while fetching gates.");
       }
       return [];
@@ -191,7 +191,7 @@ export default function CallsignInput() {
             onChange={(e) => {
               const input = e.target.value.toUpperCase();
               setCallsign(input);
-              if (!input) console.warn("❌ Callsign is empty! API call will fail.");
+              if (!input) console.warn(" Callsign is empty! API call will fail.");
             }}
             className="mt-4 px-4 py-2 w-full text-center text-white bg-gray-800 border border-gray-600 rounded-md shadow-md outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-300 ease-in-out"
           />
