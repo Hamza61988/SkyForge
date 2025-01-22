@@ -156,7 +156,7 @@ export default function Map({ callsign }: { callsign: string }) {
       console.log(`📍 Adjusting route to pass under aircraft at [${aircraftLat}, ${aircraftLon}]`);
   
       // Find the closest point on the route to the aircraft
-      let nearestIndex = 0;
+     // let nearestIndex = 0;
       let minDistance = Infinity;
       routeCoords.forEach((point, index) => {
         const distance = Math.sqrt(
