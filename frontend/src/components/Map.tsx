@@ -136,12 +136,12 @@ export default function Map({ callsign }: { callsign: string }) {
       return;
     }
   
-    //  Compute Great Circle Line
+    // 🌎 Compute Great Circle Line
     const start = turf.point([depCoords.lon, depCoords.lat]);
     const end = turf.point([destCoords.lon, destCoords.lat]);
     const greatCircle = turf.greatCircle(start, end, { npoints: 50 });
   
-    //  Ensure coordinates are `[number, number]`
+    // ✅ Ensure coordinates are `[number, number]`
     let routeCoords: [number, number][] = greatCircle.geometry.coordinates
       .map(coord => {
         if (Array.isArray(coord) && coord.length === 2 && typeof coord[0] === 'number' && typeof coord[1] === 'number') {
@@ -151,24 +151,24 @@ export default function Map({ callsign }: { callsign: string }) {
       })
       .filter((coord): coord is [number, number] => coord !== null);
   
-    //  Adjust route to enter and exit smoothly around the aircraft
+    // 🛫 Adjust route to enter and exit smoothly around the aircraft
     if (aircraftLat !== undefined && aircraftLon !== undefined) {
       console.log(`📍 Adjusting route to pass under aircraft at [${aircraftLat}, ${aircraftLon}]`);
   
       // Find the closest point on the route to the aircraft
-      let nearestIndex = 0;
+      
       let minDistance = Infinity;
-      routeCoords.forEach((point, index) => {
+      routeCoords.forEach((point) => {
         const distance = Math.sqrt(
           Math.pow(point[0] - aircraftLat, 2) + Math.pow(point[1] - aircraftLon, 2)
         );
         if (distance < minDistance) {
           minDistance = distance;
-          nearestIndex = index;
+          
         }
       });
   
-      //  Ensure aircraft position and airports are correctly typed
+      // ✅ Ensure aircraft position and airports are correctly typed
       const aircraftPoint: [number, number] = [aircraftLat, aircraftLon];
       const departurePoint: [number, number] = [depCoords.lat, depCoords.lon];
       const destinationPoint: [number, number] = [destCoords.lat, destCoords.lon];
@@ -180,12 +180,14 @@ export default function Map({ callsign }: { callsign: string }) {
         destinationPoint // Directly continue to the destination
       ];
   
-      
+      console.log(`✅ Adjusted route now smoothly enters and exits around the aircraft`);
       setRoute(adjustedRoute);
     } else {
       setRoute(routeCoords); // Keep the original route if no aircraft data
     }
   };
+  
+
   
   
 

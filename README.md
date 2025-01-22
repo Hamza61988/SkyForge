@@ -1,127 +1,116 @@
-# ✈️ SkyForge 
+# SkyForge
 
 
-RunwayLink is part of SkyForge.
-RunwayLink is an **ATC & Gate Assignment Tool** designed to **enhance the virtual aviation experience** by integrating directly with **IVAO** and using **OpenStreetMap (OSM)** to assign accurate **airport gates** dynamically. It also provides **real-time flight tracking and automated gate assignments**.
+## Overview
+SkyForge is an advanced suite of aviation tools designed to enhance the virtual air traffic control (ATC) and pilot experience. Built with precision, automation, and user-centric features, SkyForge will provide intelligent solutions for air traffic controllers and pilots, offering seamless integration with IVAO's network and real-world aviation data sources.
 
----
+## Features
+SkyForge is an evolving platform that currently focuses on:
 
-## 🚀 **Features**
-✅ **IVAO API Integration** - Fetches real-time flight plans from IVAO.  
-✅ **Automated Gate Assignment** - Uses **OSM & OpenCage** to dynamically fetch **gates** for arriving flights.  
-✅ **Flight Route Visualization** - Displays flight routes on an interactive map.  
-✅ **Smooth Animations** - Uses **Framer Motion** for an elegant UI experience.  
-✅ **Dark & Futuristic UI** - Inspired by aviation control panels.  
-✅ **Built with TypeScript + Vite + React** for optimal performance.  
+### ✈️ **RunwayLink** (Gate Assignment & Ground Handling Assistant)
+- **Automated Gate Assignment:** Assigns optimal gates to aircraft based on real-time traffic data.
+- **Live Position Tracking:** Retrieves and visualizes aircraft locations using IVAO’s Whazzup v2 JSON API.
+- **Flight Route Analysis:** Fetches and displays planned routes for better ground coordination.
+- **Interactive Map Interface:** Real-time visualization of airport layouts, aircraft positions, and taxiways.
+- **Data Integration:** Uses OpenStreetMap (OSM) and Google Earth to dynamically pull airport gate layouts.
 
----
+### 🌍 **ATC Utility Suite** *(Upcoming Features)*
+- **Real-Time Traffic Monitoring:** Live traffic analysis with aircraft filtering and sorting.
+- **Advanced METAR & Weather Tools:** Retrieves real-time weather reports for accurate flight planning.
+- **Custom Waypoint & Labeling Tools:** Enables manual and automated waypoint placement for traffic coordination.
+- **Real Airport Traffic Simulation:** Simulate real-world traffic flows for ATC training
+- **Controller Logbook & Performance Analytics:** Tracks controller performance, session duration, and handled    traffic.
 
-## 🛠 **Tech Stack**
-- **Frontend**: React + Vite + TypeScript + TailwindCSS
-- **Animations**: Framer Motion
-- **Backend API Integration**: IVAO Whazzup API
-- **Map & Geospatial Data**:
-  - OpenStreetMap (OSM) for **airport gates**
-  - OpenCage API for **geocoding airport ICAO**
-  - Leaflet for **map rendering**
-- **State Management**: React Hooks
-- **Deployment**: Vercel (or any other static site host)
-  
----
 
-## 📦 **Installation**
-To set up the project locally, follow these steps:
+### 🛠 **Future Expansions**
+SkyForge aims to expand, incorporating additional tools such as:
+- **Pilot Dispatching & Planning Tools**
+- **Fenix Airbus MSFS2020 Landing & Takeoff Performance Calculator**
+- **Structured ATC Courses:** Beginner to advanced ATC training with interactive lessons so you can be the best ATCO out there.
+- **ATC Scenarios & Case Studies:** Learn from real-life and virtual ATC incidents.
+- Integrated Dispatch Center – Central hub for flight planning, metering, and clearances.
+-
 
-### **1️⃣ Clone the repository**
-```sh
-git clone https://github.com/your-username/skyforge.git
-cd skyforge
+### 🧪 SkyForge AeroLab (soon to come)
+A section within SkyForge dedicated to science, engineering, and aviation discussions. This forum will go beyond ATC and flight simulation, allowing enthusiasts, students, and professionals to collaborate on aerospace, engineering, physics, and cutting-edge technology.
+
+- **Educational Resources & Learning Hub:** Share books, courses, and expert knowledge on aviation and STEM topics.
+- **Software Development & Flight Sim Tech:** Exchange knowledge on programming, sim development, and aviation-related coding projects.
+- **Air Traffic Control & Navigation:** Talk about ATC systems, airspace management, and real-world aviation tech.
+
+
+
+## Technologies Used
+SkyForge is built with a modern technology stack to ensure efficiency, scalability, and performance.
+
+### **Frontend**
+- **React (TypeScript) + Vite** – High-performance UI framework for an interactive user experience.
+- **Tailwind CSS + Framer Motion** – Custom styling and smooth animations.
+- **Leaflet.js** – Advanced mapping solutions for flight visualization.
+
+### **Backend**
+- **Node.js + Express** – API handling and backend logic.
+- **IVAO Whazzup v2 JSON API** – Real-time aircraft and ATC data.
+- **OpenStreetMap (Overpass API)** – Retrieves airport gate and taxiway information.
+
+### **Development Tools**
+- **Visual Studio Code** – Preferred development environment.
+- **GitHub Actions** – Continuous Integration/Deployment (CI/CD).
+- **Plesk (IONOS VPS)** – Production hosting without Docker.
+
+## Installation & Setup
+### **Prerequisites**
+Ensure you have the following installed on your machine:
+- Node.js (v16 or higher)
+- npm or yarn
+- Git
+- A valid IVAO API key for Whazzup v2 authentication
+
+### **Clone the Repository**
+```bash
+git clone https://github.com/your-username/SkyForge.git
+cd SkyForge
 ```
 
-### **2️⃣ Install dependencies**
-```sh
+### **Backend Setup**
+```bash
+cd backend
 npm install
-```
-
-### **3️⃣ Set up environment variables**
-Create a `.env` file in the root directory and add:
-```env
-VITE_OPENCAGE_API_KEY=your_opencage_api_key_here
-```
-
-### **4️⃣ Start the development server**
-```sh
 npm run dev
 ```
-- The app will be available at **http://localhost:5173**
 
----
-
-
-## ✈️ **How It Works**
-1. **User selects an airport** via `AirportSelection.tsx`.
-2. **User enters a callsign** in `CallsignInput.tsx` to fetch the flight plan.
-3. **IVAO API retrieves the flight route**, departure, arrival, and aircraft type.
-4. **OpenCage fetches airport coordinates** based on ICAO.
-5. **OpenStreetMap (OSM) fetches gates** at the arrival airport.
-6. **A gate is dynamically assigned** based on the aircraft type.
-7. **Flight path is displayed on the map** with a smooth animated UI.
-
----
-
-## 🗺 **API Usage**
-### ✈️ **IVAO API**
-- Fetches real-time flights:
-```sh
-GET https://api.ivao.aero/v2/tracker/whazzup
+### **Frontend Setup**
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
-### 🌍 **OpenCage API**
-- Fetches airport coordinates:
-```sh
-GET https://api.opencagedata.com/geocode/v1/json?q=ICAO_CODE&key=YOUR_API_KEY
+### **Environment Variables**
+Create a `.env` file in both `backend/` and `frontend/` directories and configure your credentials:
+```
+IVAO_API_KEY=your_ivao_api_key
+OSM_OVERPASS_URL=https://overpass-api.de/api/interpreter
 ```
 
-### 🛫 **OpenStreetMap (Overpass API)**
-- Fetches airport gates:
-```sh
-GET https://overpass-api.de/api/interpreter?data=[out:json];node["aeroway"="gate"]["ref"](around:5000,LAT,LON);out;
-```
+## Contribution Guidelines
+SkyForge is an open-source project, and contributions are welcome! To contribute:
+1. **Fork the repository**
+2. **Create a feature branch:** `git checkout -b feature-name`
+3. **Commit changes:** `git commit -m "Added new feature"`
+4. **Push to branch:** `git push origin feature-name`
+5. **Create a pull request**
+
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contact & Community
+📌 **Join the SkyForge Community:**
+- [Discord](https://discord.gg/your-invite-link)
+- [GitHub Issues](https://github.com/your-username/SkyForge/issues)
+
+📧 **Contact the Developer:**
+- Email: your-email@example.com
 
 ---
-
-## 🏗 **Planned Features**
-🔹 **Real-Time flight Tracking**  
-🔹 **Save Assigned Gates to Database**  
-
-
----
-
-## 🤝 **Contributing**
-Contributions are welcome! To contribute:
-1. **Fork** the repo & create a branch:  
-   ```sh
-   git checkout -b feature-name
-   ```
-2. **Make changes & commit**:  
-   ```sh
-   git commit -m "Added feature X"
-   ```
-3. **Push the branch & create a PR**:
-   ```sh
-   git push origin feature-name
-   ```
-
----
-
-## 📝 **License**
-📜 SkyForge is **open-source** and licensed under the **MIT License**.  
-Feel free to use, modify, and contribute! ✈️
-
----
-
-## 📞 **Contact & Support**
-For questions or support, reach out via:
-- ✉️ **Email**: mikhaelmiro300@gmail.com
-
-
+### 🚀 SkyForge: Elevating Virtual ATC & Flight Simulation
