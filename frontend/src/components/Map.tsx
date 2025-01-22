@@ -1,9 +1,9 @@
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import axios from "axios";
-import * as turf from "@turf/turf"; //  Import Turf.js for geodesic calculations
+import * as turf from "@turf/turf"; // Import Turf.js for geodesic calculations
 
 const API_KEY = import.meta.env.VITE_OPENCAGE_API_KEY; // OpenCage API for airport coordinates
 const IVAO_CLIENT_ID = import.meta.env.VITE_IVAO_CLIENT_ID;
@@ -21,13 +21,13 @@ interface AircraftData {
   lastUpdated: number;
 }
 
-export default function Map({ callsign }: { callsign: string }) {
+export default function Map({ callsign, gateLocation }: { callsign: string; gateLocation?: { lat: number; lon: number } | null }) {
   const [aircraftData, setAircraftData] = useState<AircraftData | null>(null);
   const [route, setRoute] = useState<[number, number][]>([]);
-  const [aircraftHeading, setAircraftHeading] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const mapRef = useRef<L.Map | null>(null);
 
-  // 🛰 Fetch Airport Coordinates from OpenCage API
+  // Fetch Airport Coordinates
   const fetchAirportCoordinates = async (icao: string) => {
     try {
       const response = await axios.get(
@@ -45,43 +45,39 @@ export default function Map({ callsign }: { callsign: string }) {
     return null;
   };
 
-  //  Fetch Aircraft Data from IVAO API
+  // Fetch Aircraft Data from IVAO API
   const fetchAircraftData = useCallback(async () => {
     try {
       if (!callsign) return;
-      console.log(`📡 Fetching real-time position for: ${callsign.toUpperCase()}`);
-  
       setLoading(true);
-  
-      //  Get OAuth Token for IVAO API
+
+      // Get OAuth Token
       const tokenResponse = await axios.post("https://api.ivao.aero/v2/oauth/token", {
         grant_type: "client_credentials",
         client_id: IVAO_CLIENT_ID,
         client_secret: IVAO_CLIENT_SECRET,
       });
-  
+
       const accessToken = tokenResponse.data.access_token;
-  
-      // 🔍 Fetch aircraft data
+
+      // Fetch aircraft data
       const response = await axios.get("https://api.ivao.aero/v2/tracker/whazzup", {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
-  
+
       const pilots = response.data.clients.pilots;
       const aircraft = pilots.find(
         (ac: any) => ac.callsign.trim().toUpperCase() === callsign.trim().toUpperCase()
       );
-  
+
       if (!aircraft) {
         console.warn(`⚠ No live data found for callsign: ${callsign}`);
         setAircraftData(null);
         setLoading(false);
         return;
       }
-  
-      console.log(" Live Aircraft Data:", aircraft);
-  
-      // ✈️ Update aircraft state
+
+      // Update aircraft state
       const aircraftInfo: AircraftData = {
         callsign: aircraft.callsign,
         latitude: aircraft.lastTrack.latitude,
@@ -93,10 +89,10 @@ export default function Map({ callsign }: { callsign: string }) {
         heading: aircraft.lastTrack.heading || 0,
         lastUpdated: Date.now(),
       };
-  
+
       setAircraftData(aircraftInfo);
-  
-      // 🛰 Fetch Great Circle Route and ensure it passes under aircraft
+
+      // Fetch Great Circle Route
       if (aircraftInfo.departure !== "Unknown" && aircraftInfo.destination !== "Unknown") {
         generateGreatCircleRoute(
           aircraftInfo.departure,
@@ -104,13 +100,8 @@ export default function Map({ callsign }: { callsign: string }) {
           aircraftInfo.latitude,
           aircraftInfo.longitude
         );
-        calculateAircraftHeading(
-          aircraftInfo.latitude,
-          aircraftInfo.longitude,
-          aircraftInfo.destination
-        );
       }
-  
+
       setLoading(false);
     } catch (error) {
       console.error("❌ Error fetching aircraft data:", error);
@@ -118,14 +109,14 @@ export default function Map({ callsign }: { callsign: string }) {
     }
   }, [callsign]);
 
-  //  Generate Great Circle Route Using Turf.js
+  // Generate Great Circle Route
   const generateGreatCircleRoute = async (
     departureICAO: string,
     destinationICAO: string,
     aircraftLat?: number,
     aircraftLon?: number
   ) => {
-    console.log(`🗺️ Generating Great Circle Route from ${departureICAO} to ${destinationICAO}`);
+    console.log(`🗺️ Generating Route from ${departureICAO} to ${destinationICAO} via aircraft position`);
   
     const depCoords = await fetchAirportCoordinates(departureICAO);
     const destCoords = await fetchAirportCoordinates(destinationICAO);
@@ -136,77 +127,53 @@ export default function Map({ callsign }: { callsign: string }) {
       return;
     }
   
-    // 🌎 Compute Great Circle Line
-    const start = turf.point([depCoords.lon, depCoords.lat]);
-    const end = turf.point([destCoords.lon, destCoords.lat]);
-    const greatCircle = turf.greatCircle(start, end, { npoints: 50 });
+    const departurePoint: [number, number] = [depCoords.lat, depCoords.lon];
+    const destinationPoint: [number, number] = [destCoords.lat, destCoords.lon];
   
-    // ✅ Ensure coordinates are `[number, number]`
-    let routeCoords: [number, number][] = greatCircle.geometry.coordinates
-      .map(coord => {
-        if (Array.isArray(coord) && coord.length === 2 && typeof coord[0] === 'number' && typeof coord[1] === 'number') {
-          return [coord[1], coord[0]]; // Swap lon/lat to lat/lon
-        }
-        return null;
-      })
-      .filter((coord): coord is [number, number] => coord !== null);
+    if (aircraftLat === undefined || aircraftLon === undefined) {
+      // 🛑 If no aircraft data, use a standard Great Circle Route
+      const start = turf.point([depCoords.lon, depCoords.lat]);
+      const end = turf.point([destCoords.lon, destCoords.lat]);
+      const greatCircle = turf.greatCircle(start, end, { npoints: 100 });
   
-    // 🛫 Adjust route to enter and exit smoothly around the aircraft
-    if (aircraftLat !== undefined && aircraftLon !== undefined) {
-      console.log(`📍 Adjusting route to pass under aircraft at [${aircraftLat}, ${aircraftLon}]`);
+      const routeCoords: [number, number][] = greatCircle.geometry.coordinates
+        .map(coord => [coord[1], coord[0]] as [number, number]); // 🔧 Ensure proper formatting
   
-      // Find the closest point on the route to the aircraft
-      
-      let minDistance = Infinity;
-      routeCoords.forEach((point) => {
-        const distance = Math.sqrt(
-          Math.pow(point[0] - aircraftLat, 2) + Math.pow(point[1] - aircraftLon, 2)
-        );
-        if (distance < minDistance) {
-          minDistance = distance;
-          
-        }
-      });
-  
-      // ✅ Ensure aircraft position and airports are correctly typed
-      const aircraftPoint: [number, number] = [aircraftLat, aircraftLon];
-      const departurePoint: [number, number] = [depCoords.lat, depCoords.lon];
-      const destinationPoint: [number, number] = [destCoords.lat, destCoords.lon];
-  
-      // Create a new modified route: [Departure → Aircraft Position → Destination]
-      const adjustedRoute: [number, number][] = [
-        departurePoint, // Start at departure
-        aircraftPoint, // Smoothly lead into the aircraft position
-        destinationPoint // Directly continue to the destination
-      ];
-  
-      console.log(`✅ Adjusted route now smoothly enters and exits around the aircraft`);
-      setRoute(adjustedRoute);
-    } else {
-      setRoute(routeCoords); // Keep the original route if no aircraft data
+      setRoute(routeCoords);
+      return;
     }
+  
+    console.log(`📍 Adjusting route to pass under aircraft at [${aircraftLat}, ${aircraftLon}]`);
+  
+    // ✅ Smooth curve from departure to aircraft
+    const smoothedEntry: [number, number][] = [
+      [(departurePoint[0] * 0.7 + aircraftLat * 0.3), (departurePoint[1] * 0.7 + aircraftLon * 0.3)] as [number, number],
+      [(departurePoint[0] * 0.4 + aircraftLat * 0.6), (departurePoint[1] * 0.4 + aircraftLon * 0.6)] as [number, number],
+    ];
+  
+    // ✅ Smooth curve from aircraft to destination
+    const smoothedExit: [number, number][] = [
+      [(aircraftLat * 0.6 + destinationPoint[0] * 0.4), (aircraftLon * 0.6 + destinationPoint[1] * 0.4)] as [number, number],
+      [(aircraftLat * 0.3 + destinationPoint[0] * 0.7), (aircraftLon * 0.3 + destinationPoint[1] * 0.7)] as [number, number],
+    ];
+  
+    // ✅ Construct final smooth route
+    const adjustedRoute: [number, number][] = [
+      departurePoint,
+      ...smoothedEntry,
+      [aircraftLat, aircraftLon] as [number, number],
+      ...smoothedExit,
+      destinationPoint,
+    ];
+  
+    console.log(`✅ Final adjusted route is smooth and direct.`);
+    setRoute(adjustedRoute);
   };
   
-
   
   
+  
 
-  //  Calculate Heading from Aircraft to Destination
-  const calculateAircraftHeading = async (
-    aircraftLat: number,
-    aircraftLon: number,
-    destinationICAO: string
-  ) => {
-    const destCoords = await fetchAirportCoordinates(destinationICAO);
-    if (!destCoords) return;
-
-    const start = turf.point([aircraftLon, aircraftLat]);
-    const end = turf.point([destCoords.lon, destCoords.lat]);
-    const bearing = turf.bearing(start, end); //  Get bearing from aircraft to destination
-
-    console.log(` Aircraft Bearing to Destination: ${bearing}°`);
-    setAircraftHeading(bearing);
-  };
 
   useEffect(() => {
     fetchAircraftData();
@@ -214,9 +181,15 @@ export default function Map({ callsign }: { callsign: string }) {
     return () => clearInterval(interval);
   }, [fetchAircraftData]);
 
+  useEffect(() => {
+    if (!gateLocation || !mapRef.current) return;
+
+    console.log(`📍 Assigned gate detected: ${gateLocation.lat}, ${gateLocation.lon}`);
+    mapRef.current.flyTo([gateLocation.lat, gateLocation.lon], 18, { animate: true, duration: 1.5 });
+  }, [gateLocation]);
+
   return (
     <div style={{ position: "relative", width: "100%", height: "400px" }}>
-      {/* Loading Indicator */}
       {loading && (
         <div style={{
           position: "absolute",
@@ -233,24 +206,59 @@ export default function Map({ callsign }: { callsign: string }) {
         </div>
       )}
 
-      <MapContainer center={[20, 0]} zoom={3} style={{ height: "100%", width: "100%" }}>
-        <TileLayer url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png" />
+      <MapContainer
+        center={[20, 0]}
+        zoom={3}
+        style={{ height: "100%", width: "100%" }}
+        ref={mapRef}
+      >
+        <TileLayer
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          attribution="© OpenAIP"
+          maxZoom={19}
+        />
 
         {!loading && route.length > 0 && (
           <Polyline positions={route} color="blue" weight={2.5} smoothFactor={1.5} />
         )}
 
-        {!loading && aircraftData && (
-          <Marker position={[aircraftData.latitude, aircraftData.longitude]} icon={L.divIcon({
-            className: "aircraft-icon",
-            html: `<div style="transform: rotate(${aircraftHeading}deg);">
-              <img src="/planevector.png" style="width: 32px; height: 32px;" />
-            </div>`,
-            iconSize: [32, 32],
-            iconAnchor: [16, 16],
-          })}>
-            <Popup><strong>{aircraftData.callsign}</strong></Popup>
-          </Marker>
+{!loading && aircraftData && (
+  <Marker
+    position={[aircraftData.latitude, aircraftData.longitude]}
+    icon={L.divIcon({
+      className: "aircraft-icon",
+      html: `<div style="transform: rotate(${aircraftData.heading || 0}deg);">
+        <img src="/planevector.png" style="width: 32px; height: 32px;" />
+      </div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16], // Centers the aircraft icon properly
+    })}
+  >
+    <Popup>
+      <strong>{aircraftData.callsign}</strong><br />
+      Altitude: {aircraftData.altitude.toLocaleString()} ft<br />
+      Ground Speed: {aircraftData.ground_speed} kt
+    </Popup>
+  </Marker>
+)}
+
+        {gateLocation && (
+          <Marker
+            position={[gateLocation.lat, gateLocation.lon]}
+            icon={L.divIcon({
+              className: "gate-marker",
+              html: `<div style="
+                width: 8px;
+                height: 8px;
+                background-color: red;
+                border-radius: 50%;
+                border: 2px solid white;
+                box-shadow: 0px 0px 6px rgba(255, 0, 0, 0.8);
+              "></div>`,
+              iconSize: [8, 8],
+              iconAnchor: [4, 4],
+            })}
+          />
         )}
       </MapContainer>
     </div>
