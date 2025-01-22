@@ -27,7 +27,7 @@ SkyForge aims to expand, incorporating additional tools such as:
 - **Pilot Dispatching & Planning Tools**
 - **Structured ATC Courses:** Beginner to advanced ATC training with interactive lessons so you can be the best ATCO out there.
 - **ATC Scenarios & Case Studies:** Learn from real-life and virtual ATC incidents.
-- Integrated Dispatch Center – Central hub for flight planning, metering, and clearances.
+- **Integrated Dispatch Center** – Central hub for flight planning, metering...
 
 
 ### 🧪 SkyForge AeroLab (soon to come)
