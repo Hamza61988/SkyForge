@@ -222,14 +222,8 @@ export default function Map({
 
   useEffect(() => {
     if (!gateLocation || !mapRef.current) return;
-
-    console.log(
-      `📍 Assigned gate detected: ${gateLocation.lat}, ${gateLocation.lon}`
-    );
-    mapRef.current.flyTo([gateLocation.lat, gateLocation.lon], 18, {
-      animate: true,
-      duration: 1.5,
-    });
+  
+    mapRef.current.flyTo([gateLocation.lat, gateLocation.lon], 18, { animate: true, duration: 1.5 });
   }, [gateLocation]);
 
   return (
