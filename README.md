@@ -25,11 +25,10 @@ SkyForge is an evolving platform that currently focuses on:
 ### 🛠 **Future Expansions**
 SkyForge aims to expand, incorporating additional tools such as:
 - **Pilot Dispatching & Planning Tools**
-- **Fenix Airbus MSFS2020 Landing & Takeoff Performance Calculator**
 - **Structured ATC Courses:** Beginner to advanced ATC training with interactive lessons so you can be the best ATCO out there.
 - **ATC Scenarios & Case Studies:** Learn from real-life and virtual ATC incidents.
-- Integrated Dispatch Center – Central hub for flight planning, metering, and clearances.
--
+- **Integrated Dispatch Center** – Central hub for flight planning, metering...
+
 
 ### 🧪 SkyForge AeroLab (soon to come)
 A section within SkyForge dedicated to science, engineering, and aviation discussions. This forum will go beyond ATC and flight simulation, allowing enthusiasts, students, and professionals to collaborate on aerospace, engineering, physics, and cutting-edge technology.
