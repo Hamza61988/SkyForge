@@ -54,21 +54,24 @@ export default function CallsignInput() {
       setAssignedGate("Not arriving at this airport.");
       return;
     }
-
+  
     const gates = await fetchGates(arrivalICAO);
-
-    if (gates.length === 0) {
+  
+    if (!gates || gates.length === 0) {
       setAssignedGate("No gate numbers found for this airport.");
       return;
     }
-
-    // Find a gate that has a **gate number (`ref` tag)**
-    const gateWithNumber = gates.find((g: any) => g.tags && g.tags.ref && /^\d+$/.test(g.tags.ref));
-
-    if (gateWithNumber) {
-      setAssignedGate(`Gate ${gateWithNumber.tags.ref}`);
+  
+    // Accept both numeric and alphanumeric gate names (A1, B2, etc.)
+    const validGates = gates
+      .map((g: any) => g.tags?.ref)
+      .filter((ref: string | undefined) => ref && ref.trim().length > 0); // Accepts any gate with a ref
+  
+    if (validGates.length > 0) {
+      const selectedGate = validGates[Math.floor(Math.random() * validGates.length)]; // Pick random gate
+      setAssignedGate(`Gate ${selectedGate}`);
     } else {
-      setAssignedGate("No numeric gate numbers available.");
+      setAssignedGate("No valid gate numbers found.");
     }
   };
 
@@ -125,40 +128,39 @@ export default function CallsignInput() {
   const fetchGates = async (airportICAO: string) => {
     try {
       const coordinates = await fetchCoordinates(airportICAO);
-
       if (!coordinates) {
         setAssignedGate("Unable to fetch coordinates for the airport.");
         return [];
       }
-
+  
       const { lat, lng } = coordinates;
-
-      // Overpass API Query to fetch gate numbers (`ref` tag)
-      const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node["aeroway"="gate"]["ref"](around:5000,${lat},${lng});out;`;
-      console.log("Overpass API URL:", overpassUrl);
-
+      const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json];node["aeroway"="gate"](around:5000,${lat},${lng});out;`;
+  
+      console.log("🛰 Overpass API URL:", overpassUrl);
+      
       const response = await axios.get(overpassUrl);
-
-      console.log("Overpass API Response:", response.data);
-
-      if (response.data && response.data.elements) {
-        return response.data.elements;
-      } else {
+      console.log("✅ Overpass API Raw Response:", response.data);
+  
+      if (!response.data || !response.data.elements || response.data.elements.length === 0) {
         setAssignedGate("No gate numbers found.");
         return [];
       }
+  
+      console.log("🔍 Extracted Gate Data:", response.data.elements);
+      return response.data.elements;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        console.error(" Error fetching gates:", error);
+        console.error("❌ Error fetching gates:", error.message);
         setAssignedGate(`Error fetching gates: ${error.message}`);
       } else {
-        console.error(" An unknown error occurred:", error);
+        console.error("❌ Unexpected error fetching gates:", error);
         setAssignedGate("An unknown error occurred while fetching gates.");
       }
       return [];
     }
   };
-
+  
+  
   return (
     <motion.div
       className="min-h-screen flex flex-col bg-[#0A0A0A] text-gray-300 relative px-6"
