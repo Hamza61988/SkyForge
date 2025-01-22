@@ -6,11 +6,29 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const allowedOrigins = [
+    "https://runwaylink-git-main-mikhas-projects-8ad7e1de.vercel.app", // Vercel Frontend
+    "https://runwaylink.vercel.app", // Main Vercel Domain
+    "http://localhost:5173", // Local Development
+];
+
+
+
 const corsOptions = {
-  origin: [/https:\/\/runwaylink\.vercel\.app/, /http:\/\/localhost:\d+/],
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true,  // ✅ Allows cookies/auth headers if needed
+    optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
+
 app.use(express.json());
 
 const WHAZZUP_V2_URL = "https://api.ivao.aero/v2/tracker/whazzup";
