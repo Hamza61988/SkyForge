@@ -37,7 +37,7 @@ interface Gate {
 
 // OpenCage API Key
 
-const GEONAMES_USERNAME = "mikha"
+const VITE_GEONAMES_USERNAME = import.meta.env.GEONAMES_USERNAME; 
 
 // Fetch coordinates using OpenCage API
 const fetchCoordinates = async (airportICAO: string) => {
@@ -45,7 +45,7 @@ const fetchCoordinates = async (airportICAO: string) => {
     console.log(`📡 Fetching coordinates for ${airportICAO} using GeoNames API`);
 
     const response = await axios.get(
-      `http://api.geonames.org/searchJSON?name=${airportICAO}&maxRows=1&username=${GEONAMES_USERNAME}`
+      `http://api.geonames.org/searchJSON?name=${airportICAO}&maxRows=1&username=${VITE_GEONAMES_USERNAME}`
     );
 
     if (response.data.geonames.length > 0) {

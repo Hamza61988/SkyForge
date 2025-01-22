@@ -13,7 +13,7 @@ import * as turf from "@turf/turf"; // Import Turf.js for geodesic calculations
 
 const IVAO_CLIENT_ID = import.meta.env.VITE_IVAO_CLIENT_ID;
 const IVAO_CLIENT_SECRET = import.meta.env.VITE_IVAO_CLIENT_SECRET;
-const GEONAMES_USERNAME = import.meta.env.GEONAMES_USERNAME; 
+const VITE_GEONAMES_USERNAME = import.meta.env.VITE_GEONAMES_USERNAME; 
 
 
 interface AircraftData {
@@ -53,7 +53,7 @@ const fetchAirportCoordinates = async (icao: string) => {
     console.log(`📡 Fetching coordinates for ${icao} using GeoNames API`);
 
     const response = await axios.get(
-      `http://api.geonames.org/searchJSON?q=${icao}&maxRows=1&username=${GEONAMES_USERNAME}`
+      `http://api.geonames.org/searchJSON?q=${icao}&maxRows=1&username=${VITE_GEONAMES_USERNAME}`
     );
 
     if (response.data.geonames.length > 0) {
