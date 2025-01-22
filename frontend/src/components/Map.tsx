@@ -1,4 +1,10 @@
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polyline,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useState, useCallback, useRef } from "react";
@@ -21,7 +27,17 @@ interface AircraftData {
   lastUpdated: number;
 }
 
-export default function Map({ callsign, gateLocation }: { callsign: string; gateLocation?: { lat: number; lon: number } | null }) {
+export default function Map({
+  callsign,
+  gateLocation,
+  allGates,
+  occupiedGates,
+}: {
+  callsign: string;
+  gateLocation?: { lat: number; lon: number } | null;
+  allGates: { ref: string; lat: number; lon: number }[];
+  occupiedGates: { [key: string]: { ref: string; lat: number; lon: number } };
+}) {
   const [aircraftData, setAircraftData] = useState<AircraftData | null>(null);
   const [route, setRoute] = useState<[number, number][]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,22 +68,29 @@ export default function Map({ callsign, gateLocation }: { callsign: string; gate
       setLoading(true);
 
       // Get OAuth Token
-      const tokenResponse = await axios.post("https://api.ivao.aero/v2/oauth/token", {
-        grant_type: "client_credentials",
-        client_id: IVAO_CLIENT_ID,
-        client_secret: IVAO_CLIENT_SECRET,
-      });
+      const tokenResponse = await axios.post(
+        "https://api.ivao.aero/v2/oauth/token",
+        {
+          grant_type: "client_credentials",
+          client_id: IVAO_CLIENT_ID,
+          client_secret: IVAO_CLIENT_SECRET,
+        }
+      );
 
       const accessToken = tokenResponse.data.access_token;
 
       // Fetch aircraft data
-      const response = await axios.get("https://api.ivao.aero/v2/tracker/whazzup", {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      const response = await axios.get(
+        "https://api.ivao.aero/v2/tracker/whazzup",
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
 
       const pilots = response.data.clients.pilots;
       const aircraft = pilots.find(
-        (ac: any) => ac.callsign.trim().toUpperCase() === callsign.trim().toUpperCase()
+        (ac: any) =>
+          ac.callsign.trim().toUpperCase() === callsign.trim().toUpperCase()
       );
 
       if (!aircraft) {
@@ -93,7 +116,10 @@ export default function Map({ callsign, gateLocation }: { callsign: string; gate
       setAircraftData(aircraftInfo);
 
       // Fetch Great Circle Route
-      if (aircraftInfo.departure !== "Unknown" && aircraftInfo.destination !== "Unknown") {
+      if (
+        aircraftInfo.departure !== "Unknown" &&
+        aircraftInfo.destination !== "Unknown"
+      ) {
         generateGreatCircleRoute(
           aircraftInfo.departure,
           aircraftInfo.destination,
@@ -116,47 +142,65 @@ export default function Map({ callsign, gateLocation }: { callsign: string; gate
     aircraftLat?: number,
     aircraftLon?: number
   ) => {
-    console.log(`🗺️ Generating Route from ${departureICAO} to ${destinationICAO} via aircraft position`);
-  
+    console.log(
+      `🗺️ Generating Route from ${departureICAO} to ${destinationICAO} via aircraft position`
+    );
+
     const depCoords = await fetchAirportCoordinates(departureICAO);
     const destCoords = await fetchAirportCoordinates(destinationICAO);
-  
+
     if (!depCoords || !destCoords) {
       console.warn("⚠ Could not retrieve both airport coordinates.");
       setRoute([]);
       return;
     }
-  
+
     const departurePoint: [number, number] = [depCoords.lat, depCoords.lon];
     const destinationPoint: [number, number] = [destCoords.lat, destCoords.lon];
-  
+
     if (aircraftLat === undefined || aircraftLon === undefined) {
       // 🛑 If no aircraft data, use a standard Great Circle Route
       const start = turf.point([depCoords.lon, depCoords.lat]);
       const end = turf.point([destCoords.lon, destCoords.lat]);
       const greatCircle = turf.greatCircle(start, end, { npoints: 100 });
-  
-      const routeCoords: [number, number][] = greatCircle.geometry.coordinates
-        .map(coord => [coord[1], coord[0]] as [number, number]); // 🔧 Ensure proper formatting
-  
+
+      const routeCoords: [number, number][] =
+        greatCircle.geometry.coordinates.map(
+          (coord) => [coord[1], coord[0]] as [number, number]
+        ); // 🔧 Ensure proper formatting
+
       setRoute(routeCoords);
       return;
     }
-  
-    console.log(`📍 Adjusting route to pass under aircraft at [${aircraftLat}, ${aircraftLon}]`);
-  
+
+    console.log(
+      `📍 Adjusting route to pass under aircraft at [${aircraftLat}, ${aircraftLon}]`
+    );
+
     // ✅ Smooth curve from departure to aircraft
     const smoothedEntry: [number, number][] = [
-      [(departurePoint[0] * 0.7 + aircraftLat * 0.3), (departurePoint[1] * 0.7 + aircraftLon * 0.3)] as [number, number],
-      [(departurePoint[0] * 0.4 + aircraftLat * 0.6), (departurePoint[1] * 0.4 + aircraftLon * 0.6)] as [number, number],
+      [
+        departurePoint[0] * 0.7 + aircraftLat * 0.3,
+        departurePoint[1] * 0.7 + aircraftLon * 0.3,
+      ] as [number, number],
+      [
+        departurePoint[0] * 0.4 + aircraftLat * 0.6,
+        departurePoint[1] * 0.4 + aircraftLon * 0.6,
+      ] as [number, number],
     ];
-  
+
     // ✅ Smooth curve from aircraft to destination
     const smoothedExit: [number, number][] = [
-      [(aircraftLat * 0.6 + destinationPoint[0] * 0.4), (aircraftLon * 0.6 + destinationPoint[1] * 0.4)] as [number, number],
-      [(aircraftLat * 0.3 + destinationPoint[0] * 0.7), (aircraftLon * 0.3 + destinationPoint[1] * 0.7)] as [number, number],
+      [
+        aircraftLat * 0.6 + destinationPoint[0] * 0.4,
+        aircraftLon * 0.6 + destinationPoint[1] * 0.4,
+      ] as [number, number],
+      [
+        aircraftLat * 0.3 + destinationPoint[0] * 0.7,
+        aircraftLon * 0.3 + destinationPoint[1] * 0.7,
+      ] as [number, number],
     ];
-  
+
     // ✅ Construct final smooth route
     const adjustedRoute: [number, number][] = [
       departurePoint,
@@ -165,15 +209,10 @@ export default function Map({ callsign, gateLocation }: { callsign: string; gate
       ...smoothedExit,
       destinationPoint,
     ];
-  
+
     console.log(`✅ Final adjusted route is smooth and direct.`);
     setRoute(adjustedRoute);
   };
-  
-  
-  
-  
-
 
   useEffect(() => {
     fetchAircraftData();
@@ -184,24 +223,32 @@ export default function Map({ callsign, gateLocation }: { callsign: string; gate
   useEffect(() => {
     if (!gateLocation || !mapRef.current) return;
 
-    console.log(`📍 Assigned gate detected: ${gateLocation.lat}, ${gateLocation.lon}`);
-    mapRef.current.flyTo([gateLocation.lat, gateLocation.lon], 18, { animate: true, duration: 1.5 });
+    console.log(
+      `📍 Assigned gate detected: ${gateLocation.lat}, ${gateLocation.lon}`
+    );
+    mapRef.current.flyTo([gateLocation.lat, gateLocation.lon], 18, {
+      animate: true,
+      duration: 1.5,
+    });
   }, [gateLocation]);
 
   return (
     <div style={{ position: "relative", width: "100%", height: "400px" }}>
       {loading && (
-        <div style={{
-          position: "absolute",
-          top: "50%", left: "50%",
-          transform: "translate(-50%, -50%)",
-          backgroundColor: "rgba(0, 0, 0, 0.7)",
-          padding: "10px",
-          borderRadius: "8px",
-          color: "white",
-          fontSize: "16px",
-          zIndex: 1000,
-        }}>
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            padding: "10px",
+            borderRadius: "8px",
+            color: "white",
+            fontSize: "16px",
+            zIndex: 1000,
+          }}
+        >
           🛫 Loading Flight Data...
         </div>
       )}
@@ -219,28 +266,72 @@ export default function Map({ callsign, gateLocation }: { callsign: string; gate
         />
 
         {!loading && route.length > 0 && (
-          <Polyline positions={route} color="blue" weight={2.5} smoothFactor={1.5} />
+          <Polyline
+            positions={route}
+            color="blue"
+            weight={2.5}
+            smoothFactor={1.5}
+          />
         )}
 
-{!loading && aircraftData && (
-  <Marker
-    position={[aircraftData.latitude, aircraftData.longitude]}
-    icon={L.divIcon({
-      className: "aircraft-icon",
-      html: `<div style="transform: rotate(${aircraftData.heading || 0}deg);">
+        {!loading && aircraftData && (
+          <Marker
+            position={[aircraftData.latitude, aircraftData.longitude]}
+            icon={L.divIcon({
+              className: "aircraft-icon",
+              html: `<div style="transform: rotate(${
+                aircraftData.heading || 0
+              }deg);">
         <img src="/planevector.png" style="width: 32px; height: 32px;" />
       </div>`,
-      iconSize: [32, 32],
-      iconAnchor: [16, 16], // Centers the aircraft icon properly
-    })}
-  >
-    <Popup>
-      <strong>{aircraftData.callsign}</strong><br />
-      Altitude: {aircraftData.altitude.toLocaleString()} ft<br />
-      Ground Speed: {aircraftData.ground_speed} kt
-    </Popup>
-  </Marker>
-)}
+              iconSize: [32, 32],
+              iconAnchor: [16, 16], // Centers the aircraft icon properly
+            })}
+          >
+            <Popup>
+              <strong>{aircraftData.callsign}</strong>
+              <br />
+              Altitude: {aircraftData.altitude.toLocaleString()} ft
+              <br />
+              Ground Speed: {aircraftData.ground_speed} kt
+            </Popup>
+          </Marker>
+        )}
+
+        {/* Render All Gates */}
+        {allGates.map((gate) => {
+          const isOccupied = Object.values(occupiedGates).some(
+            (assigned) => assigned.ref === gate.ref
+          );
+
+          return (
+            <Marker
+              key={`gate-${gate.ref}`}
+              position={[gate.lat, gate.lon]}
+              icon={L.divIcon({
+                className: "gate-marker",
+                html: `<div style="
+          width: 10px;
+          height: 10px;
+          background-color: ${isOccupied ? "red" : "green"}; 
+          border-radius: 50%;
+          border: 2px solid white;
+          box-shadow: 0px 0px 6px ${
+            isOccupied ? "rgba(255, 0, 0, 0.8)" : "rgba(0, 255, 0, 0.8)"
+          };
+        "></div>`,
+                iconSize: [10, 10],
+                iconAnchor: [5, 5],
+              })}
+            >
+              <Popup>
+                <strong>Gate {gate.ref}</strong>
+                <br />
+                Status: {isOccupied ? "Occupied" : "Available"}
+              </Popup>
+            </Marker>
+          );
+        })}
 
         {gateLocation && (
           <Marker

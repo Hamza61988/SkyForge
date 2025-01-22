@@ -63,11 +63,10 @@ export default function CallsignInput() {
   const [searchParams] = useSearchParams();
   const airportICAO = searchParams.get("airport") || "No airport selected";
 
-  // Assigns the closest gate at the destination airport
-  const [assignedGates, setAssignedGates] = useState<{ [key: string]: Gate }>(
-    {}
-  ); // Store assigned gates
-
+  
+  const [allGates, setAllGates] = useState<Gate[]>([]); // Store all gates
+  const [occupiedGates, setOccupiedGates] = useState<{ [key: string]: Gate }>({}); // Store occupied gates
+  
   // Assigns the closest available gate for the callsign
   const assignGate = async (arrivalICAO: string, callsign: string) => {
     if (arrivalICAO !== airportICAO) {
@@ -75,53 +74,47 @@ export default function CallsignInput() {
       setGateLocation(null);
       return;
     }
-
-    const gates: Gate[] = await fetchGates(arrivalICAO); // ✅ Ensure gates are typed
-
+  
+    const gates: Gate[] = await fetchGates(arrivalICAO); // ✅ Fetch all gates
+  
     if (!gates || gates.length === 0) {
       setAssignedGate("No gates found for this airport.");
       setGateLocation(null);
       return;
     }
-
+  
     console.log("✅ Retrieved gates:", gates);
-
+    setAllGates(gates); // ✅ Store all available gates
+  
     // Check if this callsign already has an assigned gate
-    if (assignedGates[callsign]) {
+    if (occupiedGates[callsign]) {
       console.log(`🛬 Callsign ${callsign} already has an assigned gate.`);
-      setAssignedGate(`Gate ${assignedGates[callsign].ref}`);
-      setGateLocation({
-        lat: assignedGates[callsign].lat,
-        lon: assignedGates[callsign].lon,
-      });
+      setAssignedGate(`Gate ${occupiedGates[callsign].ref}`);
+      setGateLocation({ lat: occupiedGates[callsign].lat, lon: occupiedGates[callsign].lon });
       return;
     }
-
+  
     // Find the closest **unassigned** gate
     const availableGate: Gate | undefined = gates.find(
-      (gate: Gate) =>
-        !Object.values(assignedGates).some(
-          (assigned: Gate) => assigned.ref === gate.ref
-        )
+      (gate: Gate) => !Object.values(occupiedGates).some((assigned: Gate) => assigned.ref === gate.ref)
     );
-
+  
     if (!availableGate) {
       console.warn("⚠ No available gates left!");
       setAssignedGate("All gates are occupied.");
       setGateLocation(null);
       return;
     }
-
-    console.log(
-      `🚪 Assigning Gate ${availableGate.ref} to Callsign ${callsign}`
-    );
-
+  
+    console.log(`🚪 Assigning Gate ${availableGate.ref} to Callsign ${callsign}`);
+  
     // Save gate assignment
-    setAssignedGates((prev) => ({ ...prev, [callsign]: availableGate }));
-
+    setOccupiedGates((prev) => ({ ...prev, [callsign]: availableGate }));
+  
     setAssignedGate(`Gate ${availableGate.ref}`);
     setGateLocation({ lat: availableGate.lat, lon: availableGate.lon });
   };
+  
 
   // Fetches flight plan data for the given callsign
   const fetchFlightPlan = async () => {
@@ -279,9 +272,11 @@ export default function CallsignInput() {
         <div className="w-3/5 flex justify-center items-center pl-6">
           {flightPlan ? (
             <Map
-              callsign={callsign.toUpperCase()}
-              gateLocation={gateLocation}
-            />
+            callsign={callsign.toUpperCase()}
+            gateLocation={gateLocation}
+            allGates={allGates} //  Pass all gates
+            occupiedGates={occupiedGates} //  Pass occupied gates
+          />
           ) : (
             <p className="text-gray-400">
               Enter a callsign to display the flight path.
