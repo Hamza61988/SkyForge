@@ -53,33 +53,56 @@ export default function CallsignInput() {
   const airportICAO = searchParams.get("airport") || "No airport selected";
 
   // Assigns the closest gate at the destination airport
-  const assignGate = async (arrivalICAO: string) => {
-    if (arrivalICAO !== airportICAO) {
-      setAssignedGate("Not arriving at this airport.");
-      setGateLocation(null);
-      return;
-    }
+  const [assignedGates, setAssignedGates] = useState<{ [key: string]: Gate }>({}); // Store assigned gates
 
-    const gates = await fetchGates(arrivalICAO);
+// Assigns the closest available gate for the callsign
+const assignGate = async (arrivalICAO: string, callsign: string) => {
+  if (arrivalICAO !== airportICAO) {
+    setAssignedGate("Not arriving at this airport.");
+    setGateLocation(null);
+    return;
+  }
 
-    if (!gates || gates.length === 0) {
-      setAssignedGate("No gate numbers found for this airport.");
-      setGateLocation(null);
-      return;
-    }
+  const gates: Gate[] = await fetchGates(arrivalICAO); // ✅ Ensure gates are typed
 
-    console.log("✅ Retrieved gates:", gates);
+  if (!gates || gates.length === 0) {
+    setAssignedGate("No gates found for this airport.");
+    setGateLocation(null);
+    return;
+  }
 
-    // Select the closest gate to the airport center
-    const selectedGate = gates.reduce((closest: Gate, current: Gate) => {
-      return current.lat < closest.lat ? current : closest;
-    });
+  console.log("✅ Retrieved gates:", gates);
 
-    console.log(`🚪 Assigned Gate: ${selectedGate.ref}`);
+  // Check if this callsign already has an assigned gate
+  if (assignedGates[callsign]) {
+    console.log(`🛬 Callsign ${callsign} already has an assigned gate.`);
+    setAssignedGate(`Gate ${assignedGates[callsign].ref}`);
+    setGateLocation({ lat: assignedGates[callsign].lat, lon: assignedGates[callsign].lon });
+    return;
+  }
 
-    setAssignedGate(`Gate ${selectedGate.ref}`);
-    setGateLocation({ lat: selectedGate.lat, lon: selectedGate.lon });
-  };
+  // Find the closest **unassigned** gate
+  const availableGate: Gate | undefined = gates.find(
+    (gate: Gate) => !Object.values(assignedGates).some((assigned: Gate) => assigned.ref === gate.ref)
+  );
+
+  if (!availableGate) {
+    console.warn("⚠ No available gates left!");
+    setAssignedGate("All gates are occupied.");
+    setGateLocation(null);
+    return;
+  }
+
+  console.log(`🚪 Assigning Gate ${availableGate.ref} to Callsign ${callsign}`);
+
+  // Save gate assignment
+  setAssignedGates((prev) => ({ ...prev, [callsign]: availableGate }));
+
+  setAssignedGate(`Gate ${availableGate.ref}`);
+  setGateLocation({ lat: availableGate.lat, lon: availableGate.lon });
+};
+
+
 
   // Fetches flight plan data for the given callsign
   const fetchFlightPlan = async () => {
@@ -87,34 +110,34 @@ export default function CallsignInput() {
       alert("Please enter a callsign before fetching flight data.");
       return;
     }
-
+  
     try {
       console.log(`📡 Fetching flight plan for callsign: ${callsign.toUpperCase()}`);
-
+  
       const response = await axios.get(`${API_URL}/api/aircraft/${callsign.toUpperCase()}`);
-
+  
       if (response.status !== 200) {
         throw new Error(`API request failed with status ${response.status}`);
       }
-
+  
       const data = response.data;
-
+  
       if (!data) {
         alert("Error: Unable to fetch flight data.");
         return;
       }
-
+  
       console.log("✈️ Flight Data:", data);
-
+  
       setFlightPlan({
         departure: data.departure || "Unknown",
         arrival: data.destination || "Unknown",
         aircraft: data.aircraft || "Unknown",
         route: data.route || "Route not available",
       });
-
+  
       if (data.destination === airportICAO) {
-        assignGate(data.destination);
+        assignGate(data.destination, callsign); // ✅ Pass callsign for unique assignment
       } else {
         setAssignedGate("Not arriving at this airport.");
       }
@@ -123,6 +146,7 @@ export default function CallsignInput() {
       alert("An error occurred while fetching the flight plan.");
     }
   };
+  
 
   // Fetches available gates at the airport
   const fetchGates = async (airportICAO: string) => {
