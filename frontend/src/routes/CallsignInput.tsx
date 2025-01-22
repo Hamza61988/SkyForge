@@ -13,9 +13,18 @@ const API_URL = import.meta.env.VITE_BACKENDURL;
 interface FlightPlan {
   departure: string;
   arrival: string;
-  aircraft: string;
+  aircraft: string | Aircraft;
   route: string;
 }
+
+interface Aircraft {
+  icaoCode: string;
+  model: string;
+  wakeTurbulence: string;
+  isMilitary: boolean;
+  description: string;
+}
+
 
 // Define Gate Type
 interface Gate {
@@ -120,6 +129,8 @@ const assignGate = async (arrivalICAO: string, callsign: string) => {
         throw new Error(`API request failed with status ${response.status}`);
       }
   
+      console.log("🔍 Full API Response:", response.data); // ✅ LOG FULL RESPONSE
+  
       const data = response.data;
   
       if (!data) {
@@ -127,17 +138,26 @@ const assignGate = async (arrivalICAO: string, callsign: string) => {
         return;
       }
   
-      console.log("✈️ Flight Data:", data);
+      // Extract aircraft type
+      const aircraftType =
+        data.aircraft || 
+        data.aircraftType || 
+        data.aircraft_model || 
+        data.aircraftTypeCode || 
+        (data.flightPlan ? data.flightPlan.aircraft : undefined) || // Try extracting from flightPlan
+        "Unknown"; 
+  
+      console.log("🛫 Extracted Aircraft Type:", aircraftType); // ✅ LOG AIRCRAFT TYPE
   
       setFlightPlan({
         departure: data.departure || "Unknown",
         arrival: data.destination || "Unknown",
-        aircraft: data.aircraft || "Unknown",
+        aircraft: aircraftType,
         route: data.route || "Route not available",
       });
   
       if (data.destination === airportICAO) {
-        assignGate(data.destination, callsign); // ✅ Pass callsign for unique assignment
+        assignGate(data.destination, callsign);
       } else {
         setAssignedGate("Not arriving at this airport.");
       }
@@ -146,6 +166,8 @@ const assignGate = async (arrivalICAO: string, callsign: string) => {
       alert("An error occurred while fetching the flight plan.");
     }
   };
+  
+  
   
 
   // Fetches available gates at the airport
@@ -214,7 +236,11 @@ const assignGate = async (arrivalICAO: string, callsign: string) => {
             <div className="mt-4 p-4">
               <p><strong>Departure:</strong> {flightPlan.departure}</p>
               <p><strong>Arrival:</strong> {flightPlan.arrival}</p>
-              <p><strong>Aircraft:</strong> {flightPlan.aircraft}</p>
+              <p><strong>Aircraft:</strong> 
+  {typeof flightPlan.aircraft === "object" 
+    ? `${flightPlan.aircraft.model} (${flightPlan.aircraft.icaoCode})` 
+    : flightPlan.aircraft}
+</p>
               <p><strong>Route:</strong> {flightPlan.route}</p>
               <p><strong>Assigned Gate:</strong> {assignedGate}</p>
             </div>

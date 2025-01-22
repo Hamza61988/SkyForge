@@ -83,7 +83,8 @@ app.get("/api/aircraft/:callsign", async (req, res) => {
             ground_speed: aircraft.lastTrack.groundSpeed,
             departure: aircraft.flightPlan ? aircraft.flightPlan.departureId : "Unknown",
             destination: aircraft.flightPlan ? aircraft.flightPlan.arrivalId : "Unknown",
-            route: aircraft.flightPlan ? aircraft.flightPlan.route : "No Route"
+            route: aircraft.flightPlan ? aircraft.flightPlan.route : "No Route",
+            aircraft: aircraft.flightPlan?.aircraft || "Unknown" 
         });
 
     } catch (error) {
