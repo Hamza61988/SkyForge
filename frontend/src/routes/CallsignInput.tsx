@@ -45,7 +45,7 @@ const fetchCoordinates = async (airportICAO: string) => {
     console.log(`📡 Fetching coordinates for ${airportICAO} using GeoNames API`);
 
     const response = await axios.get(
-      `http://api.geonames.org/searchJSON?q=${airportICAO}&maxRows=1&username=${import.meta.env.VITE_GEONAMES_USERNAME}`
+      `https://api.geonames.org/searchJSON?q=${airportICAO}&maxRows=1&username=${import.meta.env.VITE_GEONAMES_USERNAME}`
     );
 
     if (response.data.geonames.length > 0) {
