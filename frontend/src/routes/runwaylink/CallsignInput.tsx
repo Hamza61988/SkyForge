@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-import Map from "../components/Map";
-import FloatingParticles from "../components/FloatingParticles";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
+import Map from "../../components/Map";
+import FloatingParticles from "../../components/FloatingParticles";
 import axios from "axios";
 import { useEffect } from "react";
 

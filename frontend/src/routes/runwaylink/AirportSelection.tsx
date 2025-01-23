@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-import FloatingParticles from "../components/FloatingParticles";
-import airportsData from "../data/airports.json"; // Local dataset
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
+import FloatingParticles from "../../components/FloatingParticles";
+import airportsData from "../../data/airports.json"; // Local dataset
 
 // Define Airport Type
 interface Airport {

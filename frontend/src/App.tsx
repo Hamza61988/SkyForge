@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import LandingPage from "./routes/LandingPage"; //  Fix import
-import AirportSelection from "./routes/AirportSelection";
-import CallsignInput from "./routes/CallsignInput";
-import GateAssignment from "./routes/GateAssignment";
+import AirportSelection from "./routes/runwaylink/AirportSelection";
+import CallsignInput from "../src/routes/runwaylink/CallsignInput"
+import GateAssignment from "../src/routes/runwaylink/GateAssignment";
 import About from "./routes/About";
 import Changelog from "./routes/Changelog";
 import Products from "./routes/Products";
