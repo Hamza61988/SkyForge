@@ -44,7 +44,6 @@ async function fetchOAuthToken() {
   const now = Date.now();
 
   if (accessToken && now < tokenExpiration) {
-    console.log("Using cached OAuth token");
     return accessToken;
   }
 
@@ -72,7 +71,7 @@ async function fetchOAuthToken() {
     accessToken = response.data.access_token;
     tokenExpiration = now + response.data.expires_in * 1000;
 
-    console.log("✅ OAuth token obtained successfully!");
+    
     return accessToken;
   } catch (error) {
     console.error("OAuth Token Fetch Failed:");
