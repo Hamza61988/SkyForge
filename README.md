@@ -4,15 +4,15 @@
 ## Overview
 SkyForge is an advanced suite of aviation tools designed to enhance the virtual air traffic control (ATC) and pilot experience. Built with precision, automation, and user-centric features, SkyForge will provide intelligent solutions for air traffic controllers and pilots, offering seamless integration with IVAO's network and real-world aviation data sources.
 
-## Features
-SkyForge is an evolving platform that currently focuses on:
-
-### ✈️ **RunwayLink** (Gate Assignment & Ground Handling Assistant)
+### ✈️ **RunwayLink** (Gate Assignment & Ground Handling Assistant) - The first Proof of Concept of SkyForge 
 - **Automated Gate Assignment:** Assigns optimal gates to aircraft based on real-time traffic data.
 - **Live Position Tracking:** Retrieves and visualizes aircraft locations using IVAO’s Whazzup v2 JSON API.
 - **Flight Route Analysis:** Fetches and displays planned routes for better ground coordination.
 - **Interactive Map Interface:** Real-time visualization of airport layouts, aircraft positions, and taxiways.
 - **Data Integration:** Uses OpenStreetMap (OSM) and Google Earth to dynamically pull airport gate layouts.
+
+## Features
+SkyForge is an evolving platform that currently focuses on:
 
 ### 🌍 **ATC Utility Suite** *(Upcoming Features)*
 - **Real-Time Traffic Monitoring:** Live traffic analysis with aircraft filtering and sorting.
@@ -105,11 +105,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contact & Community
 📌 **Join the SkyForge Community:**
-- [Discord](https://discord.gg/your-invite-link)
-- [GitHub Issues](https://github.com/your-username/SkyForge/issues)
+- [Discord](https://discord.gg/SSDmBWXpV7)
+- [GitHub Issues](https://github.com/SpaceMikha/SkyForge/issues)
 
 📧 **Contact the Developer:**
-- Email: your-email@example.com
-
+- Email: mikhaelmiro300@gmail.com
 ---
 ### 🚀 SkyForge: Elevating Virtual ATC & Flight Simulation
