@@ -105,11 +105,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contact & Community
 📌 **Join the SkyForge Community:**
-- [Discord](https://discord.gg/your-invite-link)
-- [GitHub Issues](https://github.com/your-username/SkyForge/issues)
+- [Discord](https://discord.gg/SSDmBWXpV7)
+- [GitHub Issues](https://github.com/SpaceMikha/SkyForge/issues)
 
 📧 **Contact the Developer:**
-- Email: your-email@example.com
-
+- Email: mikhaelmiro300@gmail.com
 ---
 ### 🚀 SkyForge: Elevating Virtual ATC & Flight Simulation
