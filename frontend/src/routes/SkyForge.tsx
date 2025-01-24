@@ -72,75 +72,76 @@ const SkyForgeLanding: React.FC = () => {
 
       {/* Additional Scrollable Content with Advanced Animations */}
       <motion.div
-        className="py-20 px-16 text-left"
+        className="py-24 px-16 text-left"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ duration: 1.2 }}
       >
-        <h2 className="text-4xl font-bold mb-6 text-white">
-          Advanced Features - soon to come
+        <h2 className="text-5xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+          Advanced Features - Coming Soon
         </h2>
-        <p className="text-lg max-w-3xl text-gray-100 mb-12">
-          Explore our suite of aviation tools designed to revolutionize flight
-          simulation.
+        <p className="text-lg max-w-3xl text-gray-200 mb-12 leading-relaxed">
+          Explore our upcoming suite of aviation tools designed to revolutionize flight
+          simulation and ATC operations.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {[
             {
-              title: "Brand New Flight Dispach",
-              desc: "A redesigned and improved flight dispatch system that provides a seamless experience for  pilots. It integrates real-time flight data, automated gate assignments, and a modern UI for enhanced operational efficiency.",
+              title: "Brand New Flight Dispatch",
+              desc: "An improved dispatch system that integrates real-time flight data, automated gate assignments, and a modern UI.",
             },
             {
-              title: "Pilot's Dashboard - The Ultimate Flight Tracking & Competitive Aviation Hub",
-              desc: "This system will act as a personalized flight hub, allowing pilots to review flight history, track statistics, improve skills, and compete against others globally.",
+              title: "Pilot's Dashboard - The Ultimate Tracking Hub",
+              desc: "A personalized hub for pilots to track flight history, review statistics, and compete globally.",
             },
             {
-              title: "Advanced Airbus Performance Suite (For Fenix, FSLabs, Aerosoft, etc.)",
-              desc: "An advanced Airbus aircraft performance tool designed for realistic takeoff, landing, and in-flight performance calculations. Built specifically for Fenix A320, FSLabs, Aerosoft, and other high-fidelity Airbus simulations, this system provides accurate data-driven performance metrics, fuel calculations, and real-time aircraft optimization to enhance flight operations.",
+              title: "Advanced Airbus Performance Suite",
+              desc: "Realistic takeoff, landing, and in-flight performance calculations for high-fidelity Airbus aircraft.",
             },
             {
-              title: "SkyForge: AeroLab Forum - The Aviation & Science Hub",
-              desc: "SkyForge: AeroLab Forum is a next-generation forum designed for pilots, flight simmers, engineers, and enthusiasts. It's a place to collaborate, experiment, and push the boundaries of aviation, engineering and science.",
+              title: "SkyForge: AeroLab Forum",
+              desc: "A community hub for aviation, engineering, and science discussions among pilots and enthusiasts.",
             },
             {
-              title: "Structured ATC Training",
-              desc: "Structured ATC Training is an organized, progressive learning system designed for aspiring virtual and real-world air traffic controllers (ATC). It provides a step-by-step training path, covering everything from basic phraseology to advanced radar control.",
+              title: "ATC Trainning Hub",
+              desc: "A progressive learning system for aspiring virtual and real-world ATC controllers, covering from basics to advanced radar control.",
             },
           ].map((item, index) => (
             <motion.div
               key={index}
-              className="p-6 bg-gray-900 border border-gray-700 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:border-blue-500 hover:shadow-blue-500/50"
+              className="p-8 bg-gray-900 border border-gray-800 rounded-xl shadow-lg transform transition-all duration-300 hover:scale-105 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/50"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.3, duration: 1 }}
+              transition={{ delay: index * 0.2, duration: 1 }}
             >
-              <h3 className="text-2xl font-semibold mb-4 text-white">
+              <h3 className="text-2xl font-semibold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
                 {item.title}
               </h3>
-              <p className="text-gray-100">{item.desc}</p>
+              <p className="text-gray-300 leading-relaxed">{item.desc}</p>
             </motion.div>
           ))}
         </div>
       </motion.div>
 
-      {/* New RunwayLink Section - Enhanced Styling */}
+      {/* RunwayLink Section - Enhanced Styling */}
       <motion.div
-        className="py-20 px-16 text-center bg-gray-900 bg-opacity-50 rounded-lg shadow-lg mx-10"
+        className="py-24 px-16 text-center bg-gray-900 bg-opacity-60 rounded-lg shadow-lg mx-10"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ duration: 1.2 }}
       >
-        <h2 className="text-4xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-500">
+        <h2 className="text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-500">
           Next in Line: RunwayLink
         </h2>
-        <p className="text-lg max-w-3xl mx-auto text-gray-300 mb-6">
-          RunwayLink is meant to help IVAO ATC Operators, enhancing gate
+        <p className="text-lg max-w-3xl mx-auto text-gray-300 mb-6 leading-relaxed">
+          RunwayLink is designed to help IVAO ATC operators by enhancing gate
           assignments and ground handling. Our mission is to streamline airport
-          operations with real-time data and smart automation.<br></br>
-          Be our guest and check the first verision of Runway Link. this is an
-          very early version of this product so expect some bugs. Please share
-          your feedback with us so we can improve and add more features :)
+          operations with real-time data and automation.
+          <br />
+          <br />
+          This is an early version, so expect some bugs! Your feedback is
+          valuable to us as we continue to improve and expand its capabilities.
         </p>
         <motion.a
           href="/landingpage"
@@ -149,7 +150,7 @@ const SkyForgeLanding: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 1.8 }}
         >
-          Learn More About Runway Link
+          Learn More About RunwayLink
         </motion.a>
       </motion.div>
 
