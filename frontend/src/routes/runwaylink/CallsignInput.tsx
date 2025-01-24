@@ -304,7 +304,7 @@ export default function CallsignInput() {
   
 
   return (
-    <motion.div className="min-h-screen flex flex-col bg-[#0A0A0A] text-gray-300 relative px-6">
+    <motion.div className="min-h-screen flex flex-col bg-[#0A0A0A] text-gray-300 relative w-full">
       <FloatingParticles />
       <Header />
 
