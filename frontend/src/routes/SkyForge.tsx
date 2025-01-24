@@ -78,11 +78,11 @@ const SkyForgeLanding: React.FC = () => {
         transition={{ duration: 1.2 }}
       >
         <h2 className="text-5xl font-bold mb-8 leading-[1.4] text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
-  Advanced Features - Coming Soon
-</h2>
+          Advanced Features - Coming Soon
+        </h2>
         <p className="text-lg max-w-3xl text-gray-200 mb-12 leading-relaxed">
-          Explore our upcoming suite of aviation tools designed to revolutionize flight
-          simulation and ATC operations.
+          Explore our upcoming suite of aviation tools designed to revolutionize
+          flight simulation and ATC operations.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
