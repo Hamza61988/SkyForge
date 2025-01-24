@@ -33,29 +33,37 @@ interface Gate {
   lon: number;
 }
 
-const fetchCoordinates = async (airportICAO: string) => {
+const coordinatesCache: { [icao: string]: { lat: number; lon: number } } = {};
+
+export const fetchCoordinates = async (airportICAO: string) => {
+  if (coordinatesCache[airportICAO]) {
+    console.log(`🔄 Using cached coordinates for ${airportICAO}`);
+    return coordinatesCache[airportICAO];
+  }
+
   try {
-    console.log(`Fetching coordinates for ${airportICAO} using GeoNames API`);
+    console.log(`📡 Fetching correct airport coordinates for ${airportICAO} using GeoNames API`);
 
     const response = await axios.get(
-      `https://secure.geonames.org/searchJSON?q=${airportICAO}&maxRows=1&username=${
-        import.meta.env.VITE_GEONAMES_USERNAME
-      }`
+      `https://secure.geonames.org/searchJSON?q=${airportICAO}&featureClass=S&featureCode=AIRP&maxRows=1&username=${import.meta.env.VITE_GEONAMES_USERNAME}`
     );
 
     if (response.data.geonames.length > 0) {
       const { lat, lng } = response.data.geonames[0];
-      console.log(`Coordinates for ${airportICAO}:`, { lat, lng });
-      return { lat, lon: lng };
+      coordinatesCache[airportICAO] = { lat: parseFloat(lat), lon: parseFloat(lng) }; // Store in cache
+      console.log(`✅ Corrected GeoNames coordinates for ${airportICAO}:`, { lat, lng });
+      return coordinatesCache[airportICAO];
     }
 
-    console.warn(`⚠ No coordinates found for ${airportICAO}`);
+    console.warn(`⚠ No valid coordinates found for ${airportICAO} (not an airport?)`);
   } catch (error) {
-    console.error(" Error fetching coordinates from GeoNames:", error);
+    console.error("❌ Error fetching airport coordinates from GeoNames:", error);
   }
 
   return null;
 };
+
+
 
 export default function CallsignInput() {
   const [callsign, setCallsign] = useState("");
@@ -255,48 +263,45 @@ export default function CallsignInput() {
   // Fetches available gates at the airport
   const fetchGatesFromOSM = async (airportICAO: string) => {
     try {
-      // Convert ICAO code to coordinates using GeoNames (fallback)
       const coordinates = await fetchCoordinates(airportICAO);
-
       if (!coordinates) {
+        console.error(`❌ No coordinates found for ${airportICAO}`);
         return [];
       }
-
+  
       const { lat, lon } = coordinates;
-
-      // Overpass API query to get gates
+  
+      console.log(`📡 Fetching gates for ${airportICAO} at [${lat}, ${lon}]`);
+      
       const overpassQuery = `
         [out:json];
         node["aeroway"="gate"](around:5000, ${lat}, ${lon});
         out;
       `;
-      const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(
-        overpassQuery
-      )}`;
-
-      console.log(`Querying Overpass API: ${overpassUrl}`);
-
+  
+      const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
+      console.log(`🔍 Overpass Query URL: ${overpassUrl}`);
+  
       const response = await axios.get(overpassUrl, { timeout: 10000 });
-
+  
       if (!response.data?.elements?.length) {
         console.warn(`⚠ No gates found for ${airportICAO}.`);
         return [];
       }
-
-      console.log(
-        `Found ${response.data.elements.length} gates at ${airportICAO}`
-      );
-
+  
+      console.log(`✅ Found ${response.data.elements.length} gates at ${airportICAO}`);
+  
       return response.data.elements.map((g: any) => ({
         ref: g.tags?.ref ?? "Unknown",
         lat: g.lat,
         lon: g.lon,
       }));
     } catch (error) {
-      console.error("Error fetching gates from OpenStreetMap:", error);
+      console.error(`❌ Error fetching gates from OpenStreetMap for ${airportICAO}:`, error);
       return [];
     }
   };
+  
 
   return (
     <motion.div className="min-h-screen flex flex-col bg-[#0A0A0A] text-gray-300 relative px-6">
