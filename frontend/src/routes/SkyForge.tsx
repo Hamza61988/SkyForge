@@ -85,24 +85,32 @@ const SkyForgeLanding: React.FC = () => {
           simulation.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {[
             {
-              title: "Real-Time ATC Tools",
-              desc: "Enhancing air traffic control with automation and live data.",
+              title: "Brand New Flight Dispach",
+              desc: "A redesigned and improved flight dispatch system that provides a seamless experience for  pilots. It integrates real-time flight data, automated gate assignments, and a modern UI for enhanced operational efficiency.",
             },
             {
-              title: "Weather Engine",
-              desc: "Dynamic real-world weather integration for realistic conditions.",
+              title: "Pilot's Dashboard - The Ultimate Flight Tracking & Competitive Aviation Hub",
+              desc: "This system will act as a personalized flight hub, allowing pilots to review flight history, track statistics, improve skills, and compete against others globally.",
             },
             {
-              title: "AI-Assisted Flight Planning",
-              desc: "Smart route optimization using AI-powered analysis.",
+              title: "Advanced Airbus Performance Suite (For Fenix, FSLabs, Aerosoft, etc.)",
+              desc: "An advanced Airbus aircraft performance tool designed for realistic takeoff, landing, and in-flight performance calculations. Built specifically for Fenix A320, FSLabs, Aerosoft, and other high-fidelity Airbus simulations, this system provides accurate data-driven performance metrics, fuel calculations, and real-time aircraft optimization to enhance flight operations.",
+            },
+            {
+              title: "SkyForge: AeroLab Forum - The Aviation & Science Hub",
+              desc: "SkyForge: AeroLab Forum is a next-generation forum designed for pilots, flight simmers, engineers, and enthusiasts. It's a place to collaborate, experiment, and push the boundaries of aviation, engineering and science.",
+            },
+            {
+              title: "Structured ATC Training",
+              desc: "Structured ATC Training is an organized, progressive learning system designed for aspiring virtual and real-world air traffic controllers (ATC). It provides a step-by-step training path, covering everything from basic phraseology to advanced radar control.",
             },
           ].map((item, index) => (
             <motion.div
               key={index}
-              className="p-6 bg-gray-800 rounded-lg shadow-lg"
+              className="p-6 bg-gray-900 border border-gray-700 rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:border-blue-500 hover:shadow-blue-500/50"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.3, duration: 1 }}
