@@ -105,7 +105,11 @@ export default function Header() {
             Join
           </motion.button>
         </Link>
-        <a href="mailto:admin@skyforgehq.com?subject=SkyForge%20Feedback">
+        <a
+          href="https://mail.google.com/mail/?view=cm&fs=1&to=admin@skyforgehq.com&su=SkyForge%20Feedback"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <motion.button
             className="px-5 py-2 bg-[#007BFF] text-white font-semibold rounded-lg shadow-md hover:bg-[#0056b3] transition-all font-sans"
             whileHover={{ scale: 1.05 }}
