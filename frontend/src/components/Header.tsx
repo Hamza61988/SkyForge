@@ -55,7 +55,7 @@ export default function Header() {
           </motion.button>
         </Link>
         <a
-          href="https://mail.google.com/mail/?view=cm&fs=1&to=your-email@gmail.com&su=SkyForge%20Feedback"
+          href="https://mail.google.com/mail/?view=cm&fs=1&admin@skyforgehq.com&su=SkyForge%20Feedback"
           target="_blank"
           rel="noopener noreferrer"
         >
