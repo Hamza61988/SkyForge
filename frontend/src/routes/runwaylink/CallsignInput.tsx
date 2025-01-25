@@ -8,7 +8,10 @@ import FloatingParticles from "../../components/FloatingParticles";
 import axios from "axios";
 import { useEffect } from "react";
 
-const API_URL = import.meta.env.VITE_BACKEND_URL;
+const API_URL = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, "") || "https://skyforgehq.com/api";
+
+
+console.log("🛠 API_URL:", API_URL);
 
 // Define Flight Plan Type
 interface FlightPlan {

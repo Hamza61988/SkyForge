@@ -14,7 +14,7 @@ import * as turf from "@turf/turf";
 import { fetchCoordinates } from "../../src/routes/runwaylink/CallsignInput"; 
 
 
-const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000"; // Fallback to localhost if env variable is missing
+const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000/api"; // Fallback to localhost if env variable is missing
 
 
 interface AircraftData {

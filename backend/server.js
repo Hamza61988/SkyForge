@@ -7,9 +7,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const allowedOrigins = [
-    "https://runwaylink-git-main-mikhas-projects-8ad7e1de.vercel.app", // Vercel Frontend
-    "https://runwaylink.vercel.app", // Main Vercel Domain
-    "http://localhost:5173", // Local Development
+  "https://skyforgehq.com",
+  "http://localhost:5173" 
 ];
 
 
