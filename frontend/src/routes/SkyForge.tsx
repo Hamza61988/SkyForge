@@ -13,7 +13,7 @@ const SkyForgeLanding: React.FC = () => {
     <div
       className="relative flex flex-col min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white overflow-hidden"
       style={{
-        backgroundImage: "url('/sky.jpg')",
+        backgroundImage: "url('https://images.pexels.com/photos/2387877/pexels-photo-2387877.jpeg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
@@ -77,7 +77,7 @@ const SkyForgeLanding: React.FC = () => {
         whileInView={{ opacity: 1 }}
         transition={{ duration: 1.2 }}
       >
-        <h2 className="text-5xl font-bold mb-8 leading-[1.4] text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+        <h2 className="text-5xl font-bold mb-8 leading-[1.4] text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-red-600">
           Advanced Features - Coming Soon
         </h2>
         <p className="text-lg max-w-3xl text-gray-200 mb-12 leading-relaxed">

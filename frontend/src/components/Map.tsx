@@ -10,12 +10,10 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useEffect, useState, useCallback, useRef } from "react";
 import axios from "axios";
-import * as turf from "@turf/turf"; 
-import { fetchCoordinates } from "../../src/routes/runwaylink/CallsignInput"; 
-
+import * as turf from "@turf/turf";
+import { fetchCoordinates } from "../../src/routes/runwaylink/CallsignInput";
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000/api"; // Fallback to localhost if env variable is missing
-
 
 interface AircraftData {
   callsign: string;
@@ -46,8 +44,6 @@ export default function Map({
   const mapRef = useRef<L.Map | null>(null);
 
   // Fetch Airport Coordinates
-
-  
 
   const prevCallsign = useRef<string | null>(null);
 
@@ -115,48 +111,60 @@ export default function Map({
     aircraftLon?: number
   ) => {
     console.log(`📡 Generating Route: ${departureICAO} → ${destinationICAO}`);
-  
+
     // 🔍 Ensure we get accurate airport coordinates
     const depCoords = await fetchCoordinates(departureICAO);
     const destCoords = await fetchCoordinates(destinationICAO);
-  
+
     if (!depCoords || !destCoords) {
-      console.warn("⚠ Missing airport coordinates. Defaulting to a direct line.");
-      setRoute([[40, -3], [51, 0]]); // Temporary Madrid → London route
+      console.warn(
+        "⚠ Missing airport coordinates. Defaulting to a direct line."
+      );
+      setRoute([
+        [40, -3],
+        [51, 0],
+      ]); // Temporary Madrid → London route
       return;
     }
-  
-    console.log(`✅ Departure ICAO (${departureICAO}): ${depCoords.lat}, ${depCoords.lon}`);
-    console.log(`✅ Destination ICAO (${destinationICAO}): ${destCoords.lat}, ${destCoords.lon}`);
-  
+
+    console.log(
+      `✅ Departure ICAO (${departureICAO}): ${depCoords.lat}, ${depCoords.lon}`
+    );
+    console.log(
+      `✅ Destination ICAO (${destinationICAO}): ${destCoords.lat}, ${destCoords.lon}`
+    );
+
     // Standard Great Circle Route
     const start = turf.point([depCoords.lon, depCoords.lat]);
     const end = turf.point([destCoords.lon, destCoords.lat]);
     const greatCircle = turf.greatCircle(start, end, { npoints: 100 });
-  
+
     // ✅ Ensure the output is always `[number, number]`
-    const routeCoords: [number, number][] = greatCircle.geometry.coordinates.map(
-      (coord): [number, number] => [coord[1] as number, coord[0] as number]
-    );
-  
+    const routeCoords: [number, number][] =
+      greatCircle.geometry.coordinates.map((coord): [number, number] => [
+        coord[1] as number,
+        coord[0] as number,
+      ]);
+
     // ✅ Insert aircraft position into the route if available
     if (aircraftLat !== undefined && aircraftLon !== undefined) {
-      console.log(`✈️ Adjusting Route via Aircraft at [${aircraftLat}, ${aircraftLon}]`);
-  
+      console.log(
+        `✈️ Adjusting Route via Aircraft at [${aircraftLat}, ${aircraftLon}]`
+      );
+
       const adjustedRoute: [number, number][] = [
         [depCoords.lat, depCoords.lon],
         [aircraftLat, aircraftLon], // Ensure aircraft is included in the route
         [destCoords.lat, destCoords.lon],
       ];
-  
+
       setRoute(adjustedRoute);
       return;
     }
-  
+
     console.log("✅ Final Flight Route (Great Circle)");
     setRoute(routeCoords);
   };
-  
 
   useEffect(() => {
     fetchAircraftData(); // Fetch immediately on first render if callsign is new
@@ -255,10 +263,12 @@ export default function Map({
           )}
 
         {/* Render All Gates */}
-        {allGates.map((gate) =>
+        {allGates.map((gate, index) =>
           gate.lat !== undefined && gate.lon !== undefined ? (
             <CircleMarker
-              key={`gate-${gate.ref}`}
+              key={`gate-${
+                gate.ref !== "Unknown" ? gate.ref : `unknown-${index}`
+              }`}
               center={[gate.lat, gate.lon]}
               radius={occupiedGates[gate.ref] ? 7 : 5} // Bigger if occupied
               color={occupiedGates[gate.ref] ? "red" : "green"}
@@ -267,14 +277,16 @@ export default function Map({
               weight={1.5}
             >
               <Popup>
-                <strong>Gate {gate.ref}</strong>
+                <strong>
+                  Gate{" "}
+                  {gate.ref !== "Unknown" ? gate.ref : `Unknown #${index + 1}`}
+                </strong>
                 <br />
                 Status: {occupiedGates[gate.ref] ? "Occupied" : "Available"}
               </Popup>
             </CircleMarker>
           ) : null
         )}
-
         {gateLocation &&
           gateLocation.lat !== undefined &&
           gateLocation.lon !== undefined && (

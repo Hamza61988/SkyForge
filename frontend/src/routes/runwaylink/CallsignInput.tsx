@@ -34,6 +34,8 @@ interface Gate {
   ref: string;
   lat: number;
   lon: number;
+  operator?: string | null; 
+  type?: string; 
 }
 
 const coordinatesCache: { [icao: string]: { lat: number; lon: number } } = {};
@@ -133,7 +135,7 @@ export default function CallsignInput() {
   }, [occupiedGates]);
   
 
-  const assignGate = async (arrivalICAO: string, callsign: string) => {
+  const assignGate = async (arrivalICAO: string, callsign: string, aircraftType: string) => {
     if (!arrivalICAO || arrivalICAO === "Unknown") {
         console.warn(`⚠ Flight Plan does not contain a valid arrival ICAO for ${callsign}`);
         setAssignedGate("Invalid flight plan destination.");
@@ -149,7 +151,6 @@ export default function CallsignInput() {
     }
 
     const gates: Gate[] = await fetchGatesFromOSM(arrivalICAO);
-    
     if (!gates || gates.length === 0) {
         setAssignedGate("No gates found for this airport.");
         setGateLocation(null);
@@ -160,21 +161,32 @@ export default function CallsignInput() {
     console.log("✅ Retrieved gates:", gates);
     setAllGates(gates);
 
-    // ✅ Ensure that the callsign is tracked as active
-    setActiveAircraft((prev) => ({ ...prev, [callsign]: true }));
+    // ✅ Extract Airline Prefix from Callsign
+    const airline = callsign.substring(0, 3).toUpperCase(); // E.g., "AFR123" → "AFR"
 
-    // 🔍 If the aircraft already has a gate assigned, keep it
-    if (occupiedGates[callsign]) {
-        console.log(`🛬 Callsign ${callsign} already has an assigned gate.`);
-        setAssignedGate(`Gate ${occupiedGates[callsign].ref}`);
-        setGateLocation({ lat: occupiedGates[callsign].lat, lon: occupiedGates[callsign].lon });
-        return;
+    // 🔍 Categorize aircraft type
+    const aircraftCategories: { [key: string]: string } = {
+        "A320": "standard",
+        "B737": "standard",
+        "A380": "heavy",
+        "B747": "heavy",
+        "CRJ900": "regional",
+        "E190": "regional"
+    };
+    const category = aircraftCategories[aircraftType] || "standard"; // Default to standard
+
+    // 🎯 Find gates that match the aircraft type
+    let filteredGates = gates.filter(gate => gate.type === category);
+
+    // 🎯 Filter by airline (if airline-specific gates exist)
+    const airlineGates = filteredGates.filter(gate => gate.operator && gate.operator.includes(airline));
+
+    if (airlineGates.length > 0) {
+        filteredGates = airlineGates;
     }
 
-    // 🚨 Find the closest UNASSIGNED gate
-    const availableGate = gates.find(
-        (gate) => !Object.values(occupiedGates).some((assigned) => assigned.ref === gate.ref)
-    );
+    // 🚨 Find the first available gate
+    const availableGate = filteredGates.find(gate => !Object.values(occupiedGates).some(g => g.ref === gate.ref));
 
     if (!availableGate) {
         console.warn("⚠ No available gates left.");
@@ -185,18 +197,13 @@ export default function CallsignInput() {
 
     console.log(`🚪 Assigning Gate ${availableGate.ref} to Callsign ${callsign}`);
 
-    // ✅ Update state to store occupied gates properly
-    setOccupiedGates((prev) => {
-        const updatedGates = { ...prev, [callsign]: availableGate };
-        console.log("🔄 Updated occupied gates:", updatedGates);
-        return updatedGates;
-    });
-
+    setOccupiedGates((prev) => ({ ...prev, [callsign]: availableGate }));
     setAssignedGate(`Gate ${availableGate.ref}`);
     setGateLocation({ lat: availableGate.lat, lon: availableGate.lon });
 
     console.log(`✅ Assigned Gate: ${availableGate.ref}, Location: ${availableGate.lat}, ${availableGate.lon}`);
 };
+
 
 
   const [activeAircraft, setActiveAircraft] = useState<{
@@ -241,7 +248,7 @@ export default function CallsignInput() {
         });
 
         if (data.destination === airportICAO) {
-            assignGate(data.destination, callsign);
+            assignGate(data.destination, callsign, aircraftType);
         } else {
             setAssignedGate("Not arriving at this airport.");
         }
@@ -266,44 +273,48 @@ export default function CallsignInput() {
   // Fetches available gates at the airport
   const fetchGatesFromOSM = async (airportICAO: string) => {
     try {
-      const coordinates = await fetchCoordinates(airportICAO);
-      if (!coordinates) {
-        console.error(`❌ No coordinates found for ${airportICAO}`);
-        return [];
-      }
-  
-      const { lat, lon } = coordinates;
-  
-      console.log(`📡 Fetching gates for ${airportICAO} at [${lat}, ${lon}]`);
-      
-      const overpassQuery = `
-        [out:json];
-        node["aeroway"="gate"](around:5000, ${lat}, ${lon});
-        out;
-      `;
-  
-      const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
-      console.log(`🔍 Overpass Query URL: ${overpassUrl}`);
-  
-      const response = await axios.get(overpassUrl, { timeout: 10000 });
-  
-      if (!response.data?.elements?.length) {
-        console.warn(`⚠ No gates found for ${airportICAO}.`);
-        return [];
-      }
-  
-      console.log(`✅ Found ${response.data.elements.length} gates at ${airportICAO}`);
-  
-      return response.data.elements.map((g: any) => ({
-        ref: g.tags?.ref ?? "Unknown",
-        lat: g.lat,
-        lon: g.lon,
-      }));
+        const coordinates = await fetchCoordinates(airportICAO);
+        if (!coordinates) {
+            console.error(`❌ No coordinates found for ${airportICAO}`);
+            return [];
+        }
+
+        const { lat, lon } = coordinates;
+
+        console.log(`📡 Fetching gates for ${airportICAO} at [${lat}, ${lon}]`);
+        
+        const overpassQuery = `
+            [out:json];
+            node["aeroway"="gate"](around:5000, ${lat}, ${lon});
+            out body;
+        `;
+
+        const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
+        console.log(`🔍 Overpass Query URL: ${overpassUrl}`);
+
+        const response = await axios.get(overpassUrl, { timeout: 10000 });
+
+        if (!response.data?.elements?.length) {
+            console.warn(`⚠ No gates found for ${airportICAO}.`);
+            return [];
+        }
+
+        console.log(`✅ Found ${response.data.elements.length} gates at ${airportICAO}`);
+
+        return response.data.elements.map((g: any) => ({
+            ref: g.tags?.ref ?? "Unknown",
+            lat: g.lat,
+            lon: g.lon,
+            operator: g.tags?.operator || null, // 🏢 Airline restriction (if available)
+            type: g.tags?.size || "standard" // 🛫 Gate size category (if available)
+        }));
     } catch (error) {
-      console.error(`❌ Error fetching gates from OpenStreetMap for ${airportICAO}:`, error);
-      return [];
+        console.error(`❌ Error fetching gates from OpenStreetMap for ${airportICAO}:`, error);
+        return [];
     }
-  };
+};
+
+
   
 
   return (
