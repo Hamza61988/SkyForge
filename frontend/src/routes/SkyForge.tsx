@@ -34,7 +34,7 @@ const SkyForgeLanding: React.FC = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.2 }}
           >
-            Welcome to <span className="sky-glow">Sky</span>
+            Welcome to <span className="sky-glow">Skyyyyyy</span>
             <span className="forge-glow">Forge</span>
           </motion.h1>
           <motion.p
