@@ -9,7 +9,9 @@ import Changelog from "./routes/Changelog";
 import Products from "./routes/Products";
 import Join from "./routes/Join";
 import SkyForgeLanding from "./routes/SkyForge";
-import Development from "./routes/Development"; //  Ensure correct case
+import Development from "./routes/Development"; 
+import Career from "./routes/Career"
+
 
 import { useEffect } from "react";
 
@@ -38,6 +40,7 @@ function RoutesWithTransition() {
     <Routes location={location} key={location.pathname}>
       <Route path="/" element={<SkyForgeLanding />} />
       <Route path="/landingpage" element={<LandingPage />} />
+      <Route path="/career" element={<Career />} />
       <Route path="/select-airport" element={<AirportSelection />} />
       <Route path="/callsigninput" element={<CallsignInput />} />
       <Route path="/gate-assignment" element={<GateAssignment />} />
