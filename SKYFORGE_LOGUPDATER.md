@@ -28,51 +28,50 @@ This document serves as a **centralized log** for tracking important updates, ch
 
 *(Record significant updates and changes here.)*  
 
-### EXAMPLE:
+### Example Entry:
+
 ### [Version X.Y.Z] - YYYY-MM-DD
 
 #### **New Features**
--  Added [feature name] to enhance [functionality].
--  Implemented [new capability] for [specific use case].
+- Added [feature name] to enhance [functionality].
+- Implemented [new capability] for [specific use case].
   
 #### **Improvements**
--  Optimized [module/component] to improve [performance/efficiency].
--  Enhanced UI/UX for [feature/page].
-
+- Optimized [module/component] to improve [performance/efficiency].
+- Enhanced UI/UX for [feature/page].
+  
 #### **Bug Fixes**
 - Fixed an issue where [describe bug].
--  Resolved [specific error] when [specific condition].
-
+- Resolved [specific error] when [specific condition].
+  
 #### **Security Updates**
--  Patched [security vulnerability] related to [affected area].
+- Patched [security vulnerability] related to [affected area].
   
 #### **Other Changes**
--  Updated documentation for [feature/update].
--  Code refactoring for [better maintainability].
+- Updated documentation for [feature/update].
+- Code refactoring for better maintainability.
+  
+#### Example:
 
----
-**Example Entry:**
-```markdown
 ### [1.2.0] - 2025-01-26
 
 #### **New Features**
--  Added automatic gate assignment in **RunwayLink**.
--  Implemented real-time flight tracking via **Whazzup v2 API**.
-
+- Added automatic gate assignment in **RunwayLink**.
+- Implemented real-time flight tracking via **Whazzup v2 API**.
+  
 #### **Improvements**
 - Updated UI animations for smoother transitions.
--  Improved API request efficiency, reducing response time by 20%.
-
+- Improved API request efficiency, reducing response time by 20%.
+  
 #### **Bug Fixes**
--  Fixed incorrect gate assignments for large aircraft.
--  Resolved crash when fetching data from an empty flight plan.
-
+- Fixed incorrect gate assignments for large aircraft.
+- Resolved crash when fetching data from an empty flight plan.
+  
 #### **Security Updates**
--  Implemented OAuth 2.0 for IVAO API authentication.
-
+- Implemented OAuth 2.0 for IVAO API authentication.
+  
 #### **Other Changes**
--  Updated README with new API integration details.
-
+- Updated README with new API integration details.
 
 ---
 
@@ -80,19 +79,18 @@ This document serves as a **centralized log** for tracking important updates, ch
 
 *(List planned or pending changes here.)*  
 
-## EXAMPLE ENTRY
+### Example Entry:
+
 ### Planned Updates
 - 🆕 **Aircraft Ground Handling Module** – Integrating pushback, refueling, and cargo handling.
 - ⚡ **Database Optimization** – Migrating to a more scalable architecture.
 - 🎨 **Redesign Callsign Input Page** – Improving layout for better user experience.
 - 🔧 **Fix aircraft icon glitches on the map** – Some icons are misaligned.
-
+  
 ### Work in Progress
 - 🚧 **Integration with Aurora** – Status: **Testing**.
 - 📝 **Researching AI-driven gate assignment logic**.
 - 📅 **Expected Release:** 2025-02-15
-
-
 
 ---
 
@@ -100,21 +98,21 @@ This document serves as a **centralized log** for tracking important updates, ch
 
 *(Move older logs here to keep the main changelog organized.)*  
 
-## EXAMPLE ENTRRY
+### Example Entry:
+
 ### [1.0.0] - 2024-12-10  
 
 #### **Summary**
 - Initial release of **RunwayLink**.  
 - Introduced basic gate assignment and airport selection.
-
+  
 #### **Key Updates**
 - ✅ Implemented gate retrieval from OpenStreetMap.
 - 🐛 Fixed incorrect ICAO code handling.
 - 🎨 Improved UI layout for better readability.
-
+  
 #### **Reason for Archiving**
 - Version replaced by **v1.2.0**, which includes real-time tracking.
-
 
 ---
 
@@ -127,4 +125,4 @@ This document serves as a **centralized log** for tracking important updates, ch
 
 ---
 
-_Last updated: 2025-01-26 by [Mikhael da Silva]_  
+_Last updated: 2025-01-26 by [Mikhael da Silva]_
