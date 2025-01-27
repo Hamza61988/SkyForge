@@ -82,15 +82,15 @@ This document serves as a **centralized log** for tracking important updates, ch
 ### Example Entry:
 
 ### Planned Updates
-- 🆕 **Aircraft Ground Handling Module** – Integrating pushback, refueling, and cargo handling.
-- ⚡ **Database Optimization** – Migrating to a more scalable architecture.
-- 🎨 **Redesign Callsign Input Page** – Improving layout for better user experience.
-- 🔧 **Fix aircraft icon glitches on the map** – Some icons are misaligned.
+-  **Aircraft Ground Handling Module** – Integrating pushback, refueling, and cargo handling.
+-  **Database Optimization** – Migrating to a more scalable architecture.
+-  **Redesign Callsign Input Page** – Improving layout for better user experience.
+-  **Fix aircraft icon glitches on the map** – Some icons are misaligned.
   
 ### Work in Progress
-- 🚧 **Integration with Aurora** – Status: **Testing**.
-- 📝 **Researching AI-driven gate assignment logic**.
-- 📅 **Expected Release:** 2025-02-15
+-  **Integration with Aurora** – Status: **Testing**.
+-  **Researching AI-driven gate assignment logic**.
+-  **Expected Release:** 2025-02-15
 
 ---
 
@@ -107,9 +107,9 @@ This document serves as a **centralized log** for tracking important updates, ch
 - Introduced basic gate assignment and airport selection.
   
 #### **Key Updates**
-- ✅ Implemented gate retrieval from OpenStreetMap.
-- 🐛 Fixed incorrect ICAO code handling.
-- 🎨 Improved UI layout for better readability.
+-  Implemented gate retrieval from OpenStreetMap.
+-  Fixed incorrect ICAO code handling.
+-  Improved UI layout for better readability.
   
 #### **Reason for Archiving**
 - Version replaced by **v1.2.0**, which includes real-time tracking.
