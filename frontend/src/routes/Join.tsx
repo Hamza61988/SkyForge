@@ -22,6 +22,8 @@ const Join: React.FC = () => {
           Whether you're a developer, designer, community manager, or aviation
           enthusiast, there's a place for you in our team. Help us build the 
           future of flight simulation and air traffic control tools!
+
+          Keep in mind that SkyForge is a ongrowing independent project, <strong>for now</strong> all staff positions are volunteer.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 text-left mt-8">

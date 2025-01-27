@@ -53,7 +53,7 @@ const SkyForgeLanding: React.FC = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 1.8 }}
           >
-            Join SkyForge
+            Join SkyForge Team
           </motion.a>
         </motion.div>
         <motion.div

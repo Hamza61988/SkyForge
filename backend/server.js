@@ -21,7 +21,7 @@ const corsOptions = {
             callback(new Error("Not allowed by CORS"));
         }
     },
-    credentials: true,  // ✅ Allows cookies/auth headers if needed
+    credentials: true,  
     optionsSuccessStatus: 200,
 };
 
@@ -38,7 +38,7 @@ const client_secret = process.env.IVAO_CLIENT_SECRET;
 let accessToken = null;
 let tokenExpiration = 0;
 
-// Securely Fetch OAuth Token
+//Fetch OAuth Token
 async function fetchOAuthToken() {
   const now = Date.now();
 
@@ -47,7 +47,6 @@ async function fetchOAuthToken() {
   }
 
   try {
-    console.log("Requesting new OAuth token from IVAO...");
 
     const response = await axios.post(
       "https://api.ivao.aero/v2/oauth/token",
@@ -81,7 +80,7 @@ async function fetchOAuthToken() {
   }
 }
 
-// Secure Endpoint: Get Aircraft Data
+//Get Aircraft Data
 app.get("/api/aircraft/:callsign", async (req, res) => {
   const { callsign } = req.params;
   if (!callsign) {
@@ -128,5 +127,5 @@ app.get("/api/aircraft/:callsign", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Backend running on port ${PORT}`);
+  console.log(`Running on port: ${PORT}`);
 });

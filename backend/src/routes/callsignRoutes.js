@@ -1,3 +1,6 @@
+// BEFORE MODIFYING THIS BE SURE TO READ AND CHECK: "SKYFORGE_LOGUPDATER.MD" RUNWAYLINK SECTION 
+
+
 const express = require("express");
 const { getFlightPlan, checkAuroraConnection } = require("../services/auroraService");
 

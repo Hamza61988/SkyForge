@@ -47,7 +47,6 @@ export const fetchCoordinates = async (airportICAO: string) => {
   }
 
   try {
-    console.log(`📡 Fetching correct airport coordinates for ${airportICAO} using GeoNames API`);
 
     const response = await axios.get(
       `https://secure.geonames.org/searchJSON?q=${airportICAO}&featureClass=S&featureCode=AIRP&maxRows=1&username=${import.meta.env.VITE_GEONAMES_USERNAME}`
@@ -56,7 +55,6 @@ export const fetchCoordinates = async (airportICAO: string) => {
     if (response.data.geonames.length > 0) {
       const { lat, lng } = response.data.geonames[0];
       coordinatesCache[airportICAO] = { lat: parseFloat(lat), lon: parseFloat(lng) }; // Store in cache
-      console.log(`✅ Corrected GeoNames coordinates for ${airportICAO}:`, { lat, lng });
       return coordinatesCache[airportICAO];
     }
 
@@ -89,9 +87,6 @@ export default function CallsignInput() {
   // Assigns the closest available gate for the callsign
   const releaseGate = (callsign: string) => {
     if (occupiedGates[callsign]) {
-      console.log(
-        `🚪 Releasing Gate ${occupiedGates[callsign].ref} for Callsign ${callsign}`
-      );
       setOccupiedGates((prev) => {
         const newGates = { ...prev };
         delete newGates[callsign]; // Remove the gate assignment
@@ -108,7 +103,6 @@ export default function CallsignInput() {
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      console.log("🔄 Checking for departed aircraft...");
 
       for (const callsign of Object.keys(occupiedGates)) {
         try {
@@ -158,7 +152,6 @@ export default function CallsignInput() {
         return;
     }
 
-    console.log("✅ Retrieved gates:", gates);
     setAllGates(gates);
 
     // ✅ Extract Airline Prefix from Callsign
@@ -175,17 +168,17 @@ export default function CallsignInput() {
     };
     const category = aircraftCategories[aircraftType] || "standard"; // Default to standard
 
-    // 🎯 Find gates that match the aircraft type
+    //  Find gates that match the aircraft type
     let filteredGates = gates.filter(gate => gate.type === category);
 
-    // 🎯 Filter by airline (if airline-specific gates exist)
+    //  Filter by airline (if airline-specific gates exist)
     const airlineGates = filteredGates.filter(gate => gate.operator && gate.operator.includes(airline));
 
     if (airlineGates.length > 0) {
         filteredGates = airlineGates;
     }
 
-    // 🚨 Find the first available gate
+    //  Find the first available gate
     const availableGate = filteredGates.find(gate => !Object.values(occupiedGates).some(g => g.ref === gate.ref));
 
     if (!availableGate) {
@@ -195,13 +188,9 @@ export default function CallsignInput() {
         return;
     }
 
-    console.log(`🚪 Assigning Gate ${availableGate.ref} to Callsign ${callsign}`);
-
     setOccupiedGates((prev) => ({ ...prev, [callsign]: availableGate }));
     setAssignedGate(`Gate ${availableGate.ref}`);
     setGateLocation({ lat: availableGate.lat, lon: availableGate.lon });
-
-    console.log(`✅ Assigned Gate: ${availableGate.ref}, Location: ${availableGate.lat}, ${availableGate.lon}`);
 };
 
 
@@ -210,7 +199,6 @@ export default function CallsignInput() {
     [key: string]: boolean;
   }>({});
   useEffect(() => {
-    console.log("✈️ Active Aircraft:", activeAircraft);
 }, [activeAircraft]);
   // Fetches flight plan data for the given callsign
   const fetchFlightPlan = async () => {
@@ -220,8 +208,6 @@ export default function CallsignInput() {
     }
 
     try {
-        console.log(`📡 Fetching flight plan for callsign: ${callsign.toUpperCase()}`);
-
         const response = await axios.get(`${API_URL}/api/aircraft/${callsign.toUpperCase()}`);
         console.log("Full API Response:", response.data); // Debugging
 
@@ -275,13 +261,13 @@ export default function CallsignInput() {
     try {
         const coordinates = await fetchCoordinates(airportICAO);
         if (!coordinates) {
-            console.error(`❌ No coordinates found for ${airportICAO}`);
+            console.error(`No coordinates found for ${airportICAO}`);
             return [];
         }
 
         const { lat, lon } = coordinates;
 
-        console.log(`📡 Fetching gates for ${airportICAO} at [${lat}, ${lon}]`);
+        console.log(`Fetching gates for ${airportICAO} at [${lat}, ${lon}]`);
         
         const overpassQuery = `
             [out:json];
@@ -290,7 +276,7 @@ export default function CallsignInput() {
         `;
 
         const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
-        console.log(`🔍 Overpass Query URL: ${overpassUrl}`);
+        console.log(`Overpass Query URL: ${overpassUrl}`);
 
         const response = await axios.get(overpassUrl, { timeout: 10000 });
 
@@ -299,7 +285,7 @@ export default function CallsignInput() {
             return [];
         }
 
-        console.log(`✅ Found ${response.data.elements.length} gates at ${airportICAO}`);
+        console.log(`Found ${response.data.elements.length} gates at ${airportICAO}`);
 
         return response.data.elements.map((g: any) => ({
             ref: g.tags?.ref ?? "Unknown",
@@ -309,7 +295,7 @@ export default function CallsignInput() {
             type: g.tags?.size || "standard" // 🛫 Gate size category (if available)
         }));
     } catch (error) {
-        console.error(`❌ Error fetching gates from OpenStreetMap for ${airportICAO}:`, error);
+        console.error(`Error fetching gates from OpenStreetMap for ${airportICAO}:`, error);
         return [];
     }
 };

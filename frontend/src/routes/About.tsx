@@ -34,8 +34,8 @@ export default function About() {
           <strong>SkyForge</strong> is an independent aviation technology project dedicated to developing 
           innovative tools for IVAO and flight simulation. Our mission is to enhance virtual ATC operations 
           and streamline pilot interactions by providing smart automation, powerful utilities, and enhanced user experiences.  
-          From RunwayLink for gate assignments to future projects expanding beyond IVAO, SkyForge is committed to improving 
-          the world of online aviation simulation with cutting-edge solutions.
+          SkyForge is committed to improving the world of online aviation simulation with a very good user experience and innovative solutions. 
+          We are currently hiring, check out our Career section!
         </motion.p>
 
         {/* Buttons */}
@@ -47,16 +47,7 @@ export default function About() {
                 Join SkyForge
               </button>
             </Link>
-          </motion.div>
-
-          {/* Feature Ideas Button */}
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link to="/feature-ideas">
-              <button className="px-6 py-3 rounded-lg bg-gray-700 hover:bg-gray-600 text-white font-semibold shadow-lg">
-                Feature Ideas
-              </button>
-            </Link>
-          </motion.div>
+          </motion.div>          
         </div>
       </div>
 

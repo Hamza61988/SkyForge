@@ -17,7 +17,7 @@ export default function Header() {
         className="flex items-center gap-3 hover:opacity-80 transition-all"
       >
         <img src="/sflogo.png" alt="SkyForge Logo" className="w-10 h-10" />
-        <h1 className="text-white text-2xl font-bold font-heading">SkyForge</h1>
+        <h1 className="text-white text-2xl font-bold font-heading">SkyForge HQ</h1>
       </Link>
 
       {/* Desktop Navigation - Hidden on Mobile */}
@@ -96,22 +96,22 @@ export default function Header() {
 
       {/* Right: Join Button & Feedback Button (Always Visible) */}
       <div className="hidden md:flex gap-4">
-        <Link to="/join">
+        {/* <Link to="/join">
           <motion.button
-            className="px-5 py-2 bg-[#FF3131] text-white font-semibold rounded-lg shadow-md hover:bg-[#E02626] transition-all font-sans"
+            className="px-5 py-2 bg-[#963acc] text-white font-semibold rounded-lg shadow-md hover:bg-[#E02626] transition-all font-sans"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            Join
+            Login
           </motion.button>
-        </Link>
+        </Link> */}
         <a
           href="https://mail.google.com/mail/?view=cm&fs=1&to=admin@skyforgehq.com&su=SkyForge%20Feedback"
           target="_blank"
           rel="noopener noreferrer"
         >
           <motion.button
-            className="px-5 py-2 bg-[#007BFF] text-white font-semibold rounded-lg shadow-md hover:bg-[#0056b3] transition-all font-sans"
+            className="px-5 py-2 bg-[#227cd1] text-white font-semibold rounded-lg shadow-md hover:bg-[#0056b3] transition-all font-sans"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >

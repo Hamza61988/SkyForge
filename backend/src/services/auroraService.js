@@ -1,3 +1,8 @@
+
+
+// BEFORE MODIFYING THIS BE SURE TO READ AND CHECK: "SKYFORGE_LOGUPDATER.MD" RUNWAYLINK SECTION 
+
+
 const net = require("net");
 const axios = require("axios");
 
@@ -14,13 +19,13 @@ async function checkAuroraConnection() {
     const client = new net.Socket();
 
     client.connect(AURORA_PORT, AURORA_HOST, () => {
-      console.log("✅ Connected to Aurora!");
+      console.log("Connected to Aurora!");
       resolve(true);
       client.destroy();
     });
 
     client.on("error", () => {
-      console.log("❌ Aurora not detected.");
+      console.log("Aurora not detected.");
       resolve(false);
       client.destroy();
     });
@@ -37,14 +42,14 @@ async function getFlightPlan(callsign) {
     const isConnected = await checkAuroraConnection();
 
     if (isConnected) {
-      console.log("🔹 Fetching flight plan from Aurora...");
+      console.log("Fetching flight plan from Aurora...");
       return await getFlightPlanFromAurora(callsign);
     } else {
-      console.log("🔹 Fetching flight plan from IVAO API...");
+      console.log("Fetching flight plan from IVAO API...");
       return await getFlightPlanFromIVAO(callsign);
     }
   } catch (error) {
-    console.error("❌ Error fetching flight plan:", error.message);
+    console.error("Error fetching flight plan:", error.message);
     return { error: "Failed to retrieve flight plan." };
   }
 }
@@ -119,7 +124,7 @@ async function getFlightPlanFromIVAO(callsign) {
       remarks: pilotData.flight_plan.remarks || "No remarks",
     };
   } catch (error) {
-    console.error("❌ Error fetching flight plan from IVAO:", error.message);
+    console.error("Error fetching flight plan from IVAO:", error.message);
     return { error: "Failed to retrieve flight plan from IVAO." };
   }
 }

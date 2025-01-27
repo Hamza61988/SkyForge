@@ -54,7 +54,7 @@ export default function Map({
     // Skip fetching if callsign hasn't changed
     if (prevCallsign.current === callsign) {
       console.log(
-        `🔄 Skipping API fetch, callsign "${callsign}" has not changed.`
+        `Skipping API fetch, callsign "${callsign}" has not changed.`
       );
       return;
     }
@@ -72,11 +72,11 @@ export default function Map({
       }
 
       const aircraftInfo = response.data;
-      console.log("✅ Aircraft Data:", aircraftInfo);
+      console.log("Aircraft Data:", aircraftInfo);
 
       if (!aircraftInfo.latitude || !aircraftInfo.longitude) {
         console.warn(
-          "⚠ Missing lat/lon. Aircraft will not be shown on the map."
+          " Missing lat/lon. Aircraft will not be shown on the map."
         );
         setAircraftData(null);
         setLoading(false);
@@ -95,7 +95,7 @@ export default function Map({
       }
 
       setAircraftData(aircraftInfo);
-      prevCallsign.current = callsign; // ✅ Store the last fetched callsign
+      prevCallsign.current = callsign; // Store the last fetched callsign
       setLoading(false);
     } catch (error) {
       console.error("❌ Error fetching aircraft data:", error);
@@ -112,13 +112,13 @@ export default function Map({
   ) => {
     console.log(`📡 Generating Route: ${departureICAO} → ${destinationICAO}`);
 
-    // 🔍 Ensure we get accurate airport coordinates
+    //  Ensure we get accurate airport coordinates
     const depCoords = await fetchCoordinates(departureICAO);
     const destCoords = await fetchCoordinates(destinationICAO);
 
     if (!depCoords || !destCoords) {
       console.warn(
-        "⚠ Missing airport coordinates. Defaulting to a direct line."
+        " Missing airport coordinates. Defaulting to a direct line."
       );
       setRoute([
         [40, -3],
@@ -127,26 +127,20 @@ export default function Map({
       return;
     }
 
-    console.log(
-      `✅ Departure ICAO (${departureICAO}): ${depCoords.lat}, ${depCoords.lon}`
-    );
-    console.log(
-      `✅ Destination ICAO (${destinationICAO}): ${destCoords.lat}, ${destCoords.lon}`
-    );
 
     // Standard Great Circle Route
     const start = turf.point([depCoords.lon, depCoords.lat]);
     const end = turf.point([destCoords.lon, destCoords.lat]);
     const greatCircle = turf.greatCircle(start, end, { npoints: 100 });
 
-    // ✅ Ensure the output is always `[number, number]`
+    //  Ensure the output is always `[number, number]`
     const routeCoords: [number, number][] =
       greatCircle.geometry.coordinates.map((coord): [number, number] => [
         coord[1] as number,
         coord[0] as number,
       ]);
 
-    // ✅ Insert aircraft position into the route if available
+    //  Insert aircraft position into the route if available
     if (aircraftLat !== undefined && aircraftLon !== undefined) {
       console.log(
         `✈️ Adjusting Route via Aircraft at [${aircraftLat}, ${aircraftLon}]`
@@ -162,7 +156,6 @@ export default function Map({
       return;
     }
 
-    console.log("✅ Final Flight Route (Great Circle)");
     setRoute(routeCoords);
   };
 
