@@ -168,7 +168,7 @@ const SkyForgeLanding: React.FC = () => {
               desc: "Create and simulate high-intensity operational scenarios",
             },
             {
-              title: "IFF (Identification Friend or Foe",
+              title: "IFF (Identification Friend or Foe)",
               desc: "Differentiates between friendly, neutral, and hostile aircraft",
             },
             {
