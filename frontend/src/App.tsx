@@ -10,7 +10,10 @@ import Products from "./routes/Products";
 import Join from "./routes/Join";
 import SkyForgeLanding from "./routes/SkyForge";
 import Development from "./routes/Development"; 
-import Career from "./routes/Career"
+import Career from "./routes/Career";
+import Register from "./routes/Register";
+import Login from "./routes/Login";
+import Dashboard from "./routes/Dashboard";
 
 
 import { useEffect } from "react";
@@ -41,6 +44,9 @@ function RoutesWithTransition() {
       <Route path="/" element={<SkyForgeLanding />} />
       <Route path="/landingpage" element={<LandingPage />} />
       <Route path="/career" element={<Career />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/select-airport" element={<AirportSelection />} />
       <Route path="/callsigninput" element={<CallsignInput />} />
       <Route path="/gate-assignment" element={<GateAssignment />} />

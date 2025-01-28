@@ -11,13 +11,21 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@prisma/client": "^6.2.1",
     "axios": "^1.7.9",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
     "net": "^1.0.2"
   },
   "devDependencies": {
-    "@flydotio/dockerfile": "^0.7.0"
+    "@flydotio/dockerfile": "^0.7.0",
+    "@types/node": "^22.10.10",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "prisma": "^6.2.1",
+    "typescript": "^5.7.3"
   }
 }

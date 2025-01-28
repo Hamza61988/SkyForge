@@ -25,7 +25,7 @@ export default function Footer() {
         <a href="https://github.com/SpaceMikha" target="_blank" rel="noopener noreferrer" className="hover:text-gray-400 transition-all">
           <FaGithub />
         </a>
-        <a href="mailto:mikhelmiro300@gmail.com" className="hover:text-red-400 transition-all">
+        <a href="mailto:admin@skyforgehq.com" className="hover:text-red-400 transition-all">
           <FaEnvelope />
         </a>
       </div>

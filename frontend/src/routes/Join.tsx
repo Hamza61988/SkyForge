@@ -81,7 +81,7 @@ const Join: React.FC = () => {
         </div>
 
         <motion.a
-          href="https://mail.google.com/mail/?view=cm&fs=1&to=mikhaelmiro300@gmail.com&su=Application%20to%20Join%20SkyForge&body=Hello%20SkyForge%20Team,%0D%0A%0D%0AI%20am%20interested%20in%20joining%20SkyForge.%20Here%20is%20my%20information:%0D%0A%0D%0AName:%0D%0AEmail:%0D%0ARole%20Applying%20For:%0D%0AWhy%20I%20Want%20to%20Join:%0D%0A%0D%0AThank%20you!"
+          href="https://mail.google.com/mail/?view=cm&fs=1&to=admin@skyforgehq.com&su=Application%20to%20Join%20SkyForge&body=Hello%20SkyForge%20Team,%0D%0A%0D%0AI%20am%20interested%20in%20joining%20SkyForge.%20Here%20is%20my%20information:%0D%0A%0D%0AName:%0D%0AEmail:%0D%0ARole%20Applying%20For:%0D%0AWhy%20I%20Want%20to%20Join:%0D%0A%0D%0AThank%20you!"
           className="mt-12 inline-block px-10 py-5 text-xl font-semibold text-white bg-gradient-to-r from-purple-600 to-blue-400 hover:scale-105 transition-all duration-300 rounded-lg shadow-xl"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

@@ -13,7 +13,8 @@ const SkyForgeLanding: React.FC = () => {
     <div
       className="relative flex flex-col min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white overflow-hidden"
       style={{
-        backgroundImage: "url('https://images.pexels.com/photos/2387877/pexels-photo-2387877.jpeg')",
+        backgroundImage:
+          "url('https://images.pexels.com/photos/2387877/pexels-photo-2387877.jpeg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
@@ -124,9 +125,95 @@ const SkyForgeLanding: React.FC = () => {
         </div>
       </motion.div>
 
+      {/* MRC Section - Work in Progress */}
+      <motion.div
+        className="relative py-20 px-10 text-center bg-gradient-to-b from-gray-900 via-gray-800 to-black backdrop-blur-xl rounded-xl shadow-xl mx-8 border border-gray-800"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 1.2 }}
+      >
+        <h2 className="text-5xl font-bold leading-snug text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-green-700 to-green-900">
+          Next in Development: Multifunctional Radar Combination (MRC) for
+          IVAO'S Special Ops Trainning
+        </h2>
+        <p className="text-lg max-w-3xl mx-auto text-gray-300 mb-10 leading-relaxed">
+          SkyForge is working on the <strong>next generation</strong> of radar
+          systems for <strong>Special Operations</strong>. <strong>MRC</strong>{" "}
+          is designed to deliver precision, automation, and real-time
+          intelligence for pilots, bringing the most advanced training
+          capabilities to IVAO.
+        </p>
+
+        {/* Larger Image Section */}
+        <div className="flex justify-center gap-8 mb-12">
+          <motion.img
+            src="/mrc.png"
+            alt="MRC Radar Display"
+            className="w-[500px] h-auto rounded-lg shadow-lg border-none bg-transparent"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2 }}
+          />
+        </div>
+
+        {/* Two-Row Feature Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {[
+            {
+              title: "Real-Time Radar Tracking",
+              desc: "Advanced radar with high-fidelity aircraft positioning, dynamic route updates, and optimized visibility control.",
+            },
+            {
+              title: "Mission-Based Training",
+              desc: "Create and simulate high-intensity operational scenarios",
+            },
+            {
+              title: "IFF (Identification Friend or Foe",
+              desc: "Differentiates between friendly, neutral, and hostile aircraft",
+            },
+            {
+              title: "Multi-Range Scanning",
+              desc: "Supports short-, medium-, and long-range modes.",
+            },
+          ].map((item, index) => (
+            <motion.div
+              key={index}
+              className="p-6 bg-gray-800 bg-opacity-40 border border-gray-700 rounded-lg shadow-md transform transition-all duration-300 hover:scale-105 hover:border-blue-400 hover:shadow-blue-500/50 cursor-pointer"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.15, duration: 1 }}
+            >
+              <h4 className="text-xl font-semibold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                {item.title}
+              </h4>
+              <p className="text-gray-300 leading-relaxed">{item.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+
+        <p className="text-lg text-gray-400 mt-12">
+          MRC is currently under early development, and we’re working hard to bring
+          this technolgy to IVAO’s SO. Stay tuned for
+          updates!
+        </p>
+      </motion.div>
+
+      {/* Glowing Divider */}
+      <div className="relative w-full flex justify-center py-10">
+        <motion.div
+          className="w-40 h-[2px] bg-gradient-to-r from-blue-500 to-purple-500 opacity-80"
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          transition={{ duration: 1 }}
+        />
+      </div>
+
+      {/* Smooth Fade Effect */}
+      <div className="relative w-full h-32 bg-gradient-to-b from-transparent to-black" />
+
       {/* RunwayLink Section - Enhanced Styling */}
       <motion.div
-        className="py-24 px-16 text-center bg-gray-900 bg-opacity-60 rounded-lg shadow-lg mx-10"
+        className="py-24 px-16 text-center bg-gray-900 bg-opacity-90 backdrop-blur-lg rounded-xl shadow-lg mx-10"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ duration: 1.2 }}

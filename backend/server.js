@@ -1,7 +1,17 @@
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
+
 require("dotenv").config();
+
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient(); 
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+
+
+const SECRET_KEY = process.env.JWT_SECRET 
+const authRoutes = require("./src/routes/auth"); 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -29,6 +39,71 @@ app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 
 app.use(express.json());
+app.use("/api/auth", authRoutes);
+
+
+//  Authentication Routes 
+
+// **Register User**
+app.post("/api/auth/register", async (req, res) => {
+  try {
+      const { username, email, password } = req.body;
+
+      // Check if user already exists
+      const existingUser = await prisma.user.findUnique({ where: { email } });
+      if (existingUser) return res.status(400).json({ message: "Email already exists" });
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create user
+      const newUser = await prisma.user.create({
+          data: { username, email, password: hashedPassword },
+      });
+
+      res.status(201).json({ message: "User registered successfully" });
+  } catch (error) {
+      console.error("Registration Error:", error); 
+      res.status(500).json({ message: "Error registering user", error: error.message });
+  }
+});
+
+
+// **Login User**
+app.post("/api/auth/login", async (req, res) => {
+  try {
+      const { email, password } = req.body;
+
+      // Check if user exists
+      const user = await prisma.user.findUnique({ where: { email } });
+      if (!user) return res.status(400).json({ message: "Invalid email or password" });
+
+      // Validate password
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) return res.status(400).json({ message: "Invalid email or password" });
+
+      // Generate JWT token
+      const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: "7d" });
+
+      res.json({ message: "Login successful", token });
+  } catch (error) {
+      res.status(500).json({ message: "Error logging in", error: error.message });
+  }
+});
+
+function authenticateToken(req, res, next) {
+  const token = req.header("Authorization");
+  if (!token) return res.status(401).json({ message: "Access denied" });
+
+  try {
+      const verified = jwt.verify(token.replace("Bearer ", ""), SECRET_KEY);
+      req.user = verified;
+      next();
+  } catch (error) {
+      res.status(401).json({ message: "Invalid token" });
+  }
+}
+
 
 const WHAZZUP_V2_URL = "https://api.ivao.aero/v2/tracker/whazzup";
 
