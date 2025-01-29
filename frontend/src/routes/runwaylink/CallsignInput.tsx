@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "../../components/Header";
@@ -159,6 +159,7 @@ export default function CallsignInput() {
     aircraftType: string,
     departureICAO: string
   ): Promise<void> => {
+    console.log("Departure ICAO:", departureICAO);
     if (!arrivalICAO || arrivalICAO === "Unknown") {
       console.warn(`⚠ Invalid arrival ICAO for ${callsign}`);
       setAssignedGate("Invalid flight plan destination.");

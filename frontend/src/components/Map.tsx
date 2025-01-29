@@ -38,7 +38,6 @@ interface Gate {
 export default function Map({
   callsign,
   gateLocation,
-  allGates,
   occupiedGates,
   assignedGate,
 }: {
