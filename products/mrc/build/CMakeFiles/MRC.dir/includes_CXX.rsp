@@ -1,0 +1,1 @@
+-IC:/Users/mikha/Desktop/Project/SkyForge/products/mrc/build/MRC_autogen/include -IC:/Users/mikha/Desktop/Project/SkyForge/products/mrc/src/ui -isystem M:/Qt/6.8.1/mingw_64/include/QtWidgets -isystem M:/Qt/6.8.1/mingw_64/include -isystem M:/Qt/6.8.1/mingw_64/include/QtCore -isystem "M:/Qt/6.8.1/mingw_64/mkspecs/win32-g++" -isystem M:/Qt/6.8.1/mingw_64/include/QtGui

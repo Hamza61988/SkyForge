@@ -1,0 +1,5 @@
+C:/Users/mikha/Desktop/Project/SkyForge/products/mrc/build/CMakeFiles/MRC.dir
+C:/Users/mikha/Desktop/Project/SkyForge/products/mrc/build/CMakeFiles/edit_cache.dir
+C:/Users/mikha/Desktop/Project/SkyForge/products/mrc/build/CMakeFiles/rebuild_cache.dir
+C:/Users/mikha/Desktop/Project/SkyForge/products/mrc/build/CMakeFiles/MRC_autogen_timestamp_deps.dir
+C:/Users/mikha/Desktop/Project/SkyForge/products/mrc/build/CMakeFiles/MRC_autogen.dir
