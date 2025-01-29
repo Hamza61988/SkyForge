@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "../../components/Header";
@@ -8,8 +8,9 @@ import FloatingParticles from "../../components/FloatingParticles";
 import axios from "axios";
 import { useEffect } from "react";
 
-const API_URL = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, "") || "https://skyforgehq.com/api";
-
+const API_URL =
+  import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, "") ||
+  "https://skyforgehq.com/api";
 
 console.log("🛠 API_URL:", API_URL);
 
@@ -34,8 +35,9 @@ interface Gate {
   ref: string;
   lat: number;
   lon: number;
-  operator?: string | null; 
-  type?: string; 
+  operator?: string | null;
+  type?: string;
+  size?: string;
 }
 
 const coordinatesCache: { [icao: string]: { lat: number; lon: number } } = {};
@@ -47,26 +49,33 @@ export const fetchCoordinates = async (airportICAO: string) => {
   }
 
   try {
-
     const response = await axios.get(
-      `https://secure.geonames.org/searchJSON?q=${airportICAO}&featureClass=S&featureCode=AIRP&maxRows=1&username=${import.meta.env.VITE_GEONAMES_USERNAME}`
+      `https://secure.geonames.org/searchJSON?q=${airportICAO}&featureClass=S&featureCode=AIRP&maxRows=1&username=${
+        import.meta.env.VITE_GEONAMES_USERNAME
+      }`
     );
 
     if (response.data.geonames.length > 0) {
       const { lat, lng } = response.data.geonames[0];
-      coordinatesCache[airportICAO] = { lat: parseFloat(lat), lon: parseFloat(lng) }; // Store in cache
+      coordinatesCache[airportICAO] = {
+        lat: parseFloat(lat),
+        lon: parseFloat(lng),
+      }; // Store in cache
       return coordinatesCache[airportICAO];
     }
 
-    console.warn(`⚠ No valid coordinates found for ${airportICAO} (not an airport?)`);
+    console.warn(
+      `⚠ No valid coordinates found for ${airportICAO} (not an airport?)`
+    );
   } catch (error) {
-    console.error("❌ Error fetching airport coordinates from GeoNames:", error);
+    console.error(
+      "❌ Error fetching airport coordinates from GeoNames:",
+      error
+    );
   }
 
   return null;
 };
-
-
 
 export default function CallsignInput() {
   const [callsign, setCallsign] = useState("");
@@ -103,7 +112,6 @@ export default function CallsignInput() {
 
   useEffect(() => {
     const interval = setInterval(async () => {
-
       for (const callsign of Object.keys(occupiedGates)) {
         try {
           const response = await axios.get(
@@ -127,181 +135,263 @@ export default function CallsignInput() {
 
     return () => clearInterval(interval);
   }, [occupiedGates]);
-  
 
-  const assignGate = async (arrivalICAO: string, callsign: string, aircraftType: string) => {
+  const getNextGate = (stands: Gate[]): Gate | undefined => {
+    if (stands.length === 0) return undefined;
+
+    // Shuffle the stands array to randomize the selection
+    const shuffledStands = [...stands];
+    for (let i = shuffledStands.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledStands[i], shuffledStands[j]] = [
+        shuffledStands[j],
+        shuffledStands[i],
+      ]; // Swap elements
+    }
+
+    // Select the first available stand from the shuffled list
+    return shuffledStands[0];
+  };
+
+  const assignParkingStand = async (
+    arrivalICAO: string,
+    callsign: string,
+    aircraftType: string,
+    departureICAO: string
+  ): Promise<void> => {
     if (!arrivalICAO || arrivalICAO === "Unknown") {
-        console.warn(`⚠ Flight Plan does not contain a valid arrival ICAO for ${callsign}`);
-        setAssignedGate("Invalid flight plan destination.");
-        setGateLocation(null);
-        return;
+      console.warn(`⚠ Invalid arrival ICAO for ${callsign}`);
+      setAssignedGate("Invalid flight plan destination.");
+      setGateLocation(null);
+      return;
     }
 
     if (arrivalICAO !== airportICAO) {
-        setAssignedGate("Not arriving at this airport.");
-        setGateLocation(null);
-        console.warn(`Aircraft ${callsign} is NOT arriving at ${airportICAO}.`);
-        return;
+      console.warn(`⚠ Aircraft ${callsign} is NOT arriving at ${airportICAO}`);
+      setAssignedGate("Not arriving at this airport.");
+      setGateLocation(null);
+      return;
     }
 
-    const gates: Gate[] = await fetchGatesFromOSM(arrivalICAO);
-    if (!gates || gates.length === 0) {
-        setAssignedGate("No gates found for this airport.");
-        setGateLocation(null);
-        console.warn(`⚠ No gates found at ${arrivalICAO}.`);
-        return;
+    const parkingStands: Gate[] = await fetchParkingStandsFromOSM(arrivalICAO);
+    if (!parkingStands || parkingStands.length === 0) {
+      console.warn(`⚠ No parking stands found at ${arrivalICAO}.`);
+      setAssignedGate("No parking stands found.");
+      setGateLocation(null);
+      return;
     }
 
-    setAllGates(gates);
+    setAllGates(parkingStands);
 
-    // ✅ Extract Airline Prefix from Callsign
-    const airline = callsign.substring(0, 3).toUpperCase(); // E.g., "AFR123" → "AFR"
+    const airline = callsign.substring(0, 3).toUpperCase();
 
-    // 🔍 Categorize aircraft type
+    // Ensure every stand has a valid `size`
+    parkingStands.forEach((stand) => {
+      if (!stand.size) {
+        stand.size = stand.type?.includes("heavy") ? "wide" : "narrow";
+      }
+    });
+
+    // Define Aircraft Categories (use the correct categories for your use case)
     const aircraftCategories: { [key: string]: string } = {
-        "A320": "standard",
-        "B737": "standard",
-        "A380": "heavy",
-        "B747": "heavy",
-        "CRJ900": "regional",
-        "E190": "regional"
+      A320: "narrow",
+      A319: "narrow",
+      A321: "narrow",
+      B737: "narrow",
+      B738: "narrow",
+      A380: "wide",
+      B747: "wide",
+      B777: "wide",
+      B787: "wide",
+      A350: "wide",
+      CRJ900: "regional",
+      E190: "regional",
+      E175: "regional",
     };
-    const category = aircraftCategories[aircraftType] || "standard"; // Default to standard
 
-    //  Find gates that match the aircraft type
-    let filteredGates = gates.filter(gate => gate.type === category);
+    const category = aircraftCategories[aircraftType] || "narrow";
 
-    //  Filter by airline (if airline-specific gates exist)
-    const airlineGates = filteredGates.filter(gate => gate.operator && gate.operator.includes(airline));
+    // Filter stands based on aircraft type and size category
+    let eligibleStands = parkingStands.filter(
+      (stand) => stand.size === category
+    );
 
-    if (airlineGates.length > 0) {
-        filteredGates = airlineGates;
+    if (eligibleStands.length === 0) {
+      console.warn(
+        `⚠ No available stands matching aircraft size: ${category}. Expanding criteria.`
+      );
+      // Expand criteria if no exact match
+      eligibleStands = parkingStands.filter(
+        (stand) =>
+          (category === "narrow" && stand.size === "wide") ||
+          (category === "regional" && stand.size === "narrow")
+      );
     }
 
-    //  Find the first available gate
-    const availableGate = filteredGates.find(gate => !Object.values(occupiedGates).some(g => g.ref === gate.ref));
+    // Filter stands based on airline preference (if any)
+    let airlineSpecificStands = eligibleStands.filter(
+      (stand) => stand.operator && stand.operator.includes(airline)
+    );
 
-    if (!availableGate) {
-        console.warn("⚠ No available gates left.");
-        setAssignedGate("All gates are occupied.");
-        setGateLocation(null);
-        return;
+    if (airlineSpecificStands.length > 0) {
+      eligibleStands = airlineSpecificStands;
     }
 
-    setOccupiedGates((prev) => ({ ...prev, [callsign]: availableGate }));
-    setAssignedGate(`Gate ${availableGate.ref}`);
-    setGateLocation({ lat: availableGate.lat, lon: availableGate.lon });
-};
+    // Now that we've filtered stands based on criteria, we should prioritize based on gate availability
+    const availableStand = getNextGate(
+      eligibleStands.filter(
+        (stand) =>
+          !Object.values(occupiedGates).some((g) => g.ref === stand.ref)
+      )
+    );
 
+    if (!availableStand) {
+      console.warn("⚠ No available stands matching criteria.");
+      setAssignedGate("All stands are occupied.");
+      setGateLocation(null);
+      return;
+    }
 
+    setOccupiedGates((prev) => ({
+      ...prev,
+      [callsign]: availableStand, // Retain previous assignments
+    }));
+
+    setAssignedGate(`Stand ${availableStand.ref}`);
+    setGateLocation({ lat: availableStand.lat, lon: availableStand.lon });
+
+    console.log(`✅ Assigned stand ${availableStand.ref} to ${callsign}`);
+  };
 
   const [activeAircraft, setActiveAircraft] = useState<{
     [key: string]: boolean;
   }>({});
-  useEffect(() => {
-}, [activeAircraft]);
+  useEffect(() => {}, [activeAircraft]);
   // Fetches flight plan data for the given callsign
   const fetchFlightPlan = async () => {
     if (!callsign.trim()) {
-        alert("Please enter a callsign before fetching flight data.");
-        return;
+      alert("Please enter a callsign before fetching flight data.");
+      return;
     }
 
     try {
-        const response = await axios.get(`${API_URL}/api/aircraft/${callsign.toUpperCase()}`);
-        console.log("Full API Response:", response.data); // Debugging
+      const response = await axios.get(
+        `${API_URL}/api/aircraft/${callsign.toUpperCase()}`
+      );
+      console.log("Full API Response:", response.data); // Debugging
 
-        if (response.status !== 200) {
-            throw new Error(`API request failed with status ${response.status}`);
-        }
+      if (response.status !== 200) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
 
-        const data = response.data;
-        if (!data) {
-            alert("Error: Unable to fetch flight data.");
-            return;
-        }
+      const data = response.data;
+      if (!data) {
+        alert("Error: Unable to fetch flight data.");
+        return;
+      }
 
-        // Ensure Aircraft Type is Properly Set
-        const aircraftType = data.aircraft && typeof data.aircraft === "string"
-            ? data.aircraft
-            : "Unknown";
+      // Ensure Aircraft Type is Properly Set
+      const aircraftType =
+        data.aircraft && typeof data.aircraft === "string"
+          ? data.aircraft
+          : "Unknown";
 
-        setFlightPlan({
-            departure: data.departure || "Unknown",
-            arrival: data.destination || "Unknown",
-            aircraft: aircraftType,
-            route: data.route || "Route not available",
-        });
+      setFlightPlan({
+        departure: data.departure || "Unknown",
+        arrival: data.destination || "Unknown",
+        aircraft: aircraftType,
+        route: data.route || "Route not available",
+      });
 
-        if (data.destination === airportICAO) {
-            assignGate(data.destination, callsign, aircraftType);
-        } else {
-            setAssignedGate("Not arriving at this airport.");
-        }
+      if (data.destination === airportICAO) {
+        assignParkingStand(
+          data.destination,
+          callsign,
+          aircraftType,
+          data.departure
+        );
+      } else {
+        setAssignedGate("Not arriving at this airport.");
+      }
     } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-            console.error("Error fetching flight plan:", error.message);
-            if (error.response?.status === 404) {
-                alert(`⚠ Aircraft '${callsign}' not found.`);
-            } else if (error.response?.status === 500) {
-                alert("🚨 Internal Server Error. Try again later.");
-            } else {
-                alert(`An error occurred: ${error.message}`);
-            }
+      if (axios.isAxiosError(error)) {
+        console.error("Error fetching flight plan:", error.message);
+        if (error.response?.status === 404) {
+          alert(`⚠ Aircraft '${callsign}' not found.`);
+        } else if (error.response?.status === 500) {
+          alert("🚨 Internal Server Error. Try again later.");
         } else {
-            console.error("Unexpected error:", error);
-            alert("An unexpected error occurred.");
+          alert(`An error occurred: ${error.message}`);
         }
+      } else {
+        console.error("Unexpected error:", error);
+        alert("An unexpected error occurred.");
+      }
     }
-};
-
+  };
 
   // Fetches available gates at the airport
-  const fetchGatesFromOSM = async (airportICAO: string) => {
+  const fetchParkingStandsFromOSM = async (
+    airportICAO: string
+  ): Promise<Gate[]> => {
     try {
-        const coordinates = await fetchCoordinates(airportICAO);
-        if (!coordinates) {
-            console.error(`No coordinates found for ${airportICAO}`);
-            return [];
-        }
+      const coordinates = await fetchCoordinates(airportICAO);
+      if (!coordinates) {
+        console.error(`No coordinates found for ${airportICAO}`);
+        return [];
+      }
 
-        const { lat, lon } = coordinates;
+      const { lat, lon } = coordinates;
 
-        console.log(`Fetching gates for ${airportICAO} at [${lat}, ${lon}]`);
-        
-        const overpassQuery = `
+      console.log(
+        `📡 Fetching parking stands for ${airportICAO} at [${lat}, ${lon}]`
+      );
+
+      const overpassQuery = `
             [out:json];
-            node["aeroway"="gate"](around:5000, ${lat}, ${lon});
+            (
+                node["aeroway"="parking_position"](around:5000, ${lat}, ${lon});
+                node["aeroway"="gate"](around:5000, ${lat}, ${lon});
+            );
             out body;
         `;
 
-        const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
-        console.log(`Overpass Query URL: ${overpassUrl}`);
+      const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(
+        overpassQuery
+      )}`;
+      console.log(`🔗 Overpass Query URL: ${overpassUrl}`);
 
-        const response = await axios.get(overpassUrl, { timeout: 10000 });
+      const response = await axios.get(overpassUrl, { timeout: 10000 });
 
-        if (!response.data?.elements?.length) {
-            console.warn(`⚠ No gates found for ${airportICAO}.`);
-            return [];
-        }
-
-        console.log(`Found ${response.data.elements.length} gates at ${airportICAO}`);
-
-        return response.data.elements.map((g: any) => ({
-            ref: g.tags?.ref ?? "Unknown",
-            lat: g.lat,
-            lon: g.lon,
-            operator: g.tags?.operator || null, // 🏢 Airline restriction (if available)
-            type: g.tags?.size || "standard" // 🛫 Gate size category (if available)
-        }));
-    } catch (error) {
-        console.error(`Error fetching gates from OpenStreetMap for ${airportICAO}:`, error);
+      if (!response.data?.elements?.length) {
+        console.warn(`⚠ No parking stands found for ${airportICAO}.`);
         return [];
+      }
+
+      console.log(
+        `✅ Found ${response.data.elements.length} parking stands at ${airportICAO}`
+      );
+
+      return response.data.elements
+        .map((p: any) => ({
+          ref: p.tags?.ref ?? p.id ?? "Unknown",
+          lat: p.lat || (p.center?.lat ?? null),
+          lon: p.lon || (p.center?.lon ?? null),
+          operator: p.tags?.operator || null,
+          type: p.tags?.stand_type || "standard",
+          size:
+            p.tags?.size ||
+            (p.tags?.stand_type?.includes("heavy") ? "wide" : "narrow"),
+        }))
+        .filter((stand: Gate) => stand.lat !== null && stand.lon !== null); // Ensure valid coordinates
+    } catch (error) {
+      console.error(
+        `❌ Error fetching parking stands for ${airportICAO}:`,
+        error
+      );
+      return [];
     }
-};
-
-
-  
+  };
 
   return (
     <motion.div className="min-h-screen flex flex-col bg-[#0A0A0A] text-gray-300 relative w-full">
@@ -368,6 +458,7 @@ export default function CallsignInput() {
               gateLocation={gateLocation}
               allGates={allGates} //  Pass all gates
               occupiedGates={occupiedGates} //  Pass occupied gates
+              assignedGate={"assignedGate"}
             />
           ) : (
             <p className="text-gray-400">

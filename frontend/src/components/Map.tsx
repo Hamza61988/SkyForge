@@ -27,16 +27,26 @@ interface AircraftData {
   lastUpdated: number;
 }
 
+interface Gate {
+  ref: string;
+  lat: number;
+  lon: number;
+  operator?: string | null; // Airline assigned to the stand
+  type?: string; // Type of parking stand (e.g., "heavy", "regional")
+}
+
 export default function Map({
   callsign,
   gateLocation,
   allGates,
   occupiedGates,
+  assignedGate,
 }: {
   callsign: string;
   gateLocation?: { lat: number; lon: number } | null;
-  allGates: { ref: string; lat: number; lon: number }[];
-  occupiedGates: { [key: string]: { ref: string; lat: number; lon: number } };
+  allGates: Gate[];
+  occupiedGates: { [key: string]: Gate };
+  assignedGate: string;
 }) {
   const [aircraftData, setAircraftData] = useState<AircraftData | null>(null);
   const [route, setRoute] = useState<[number, number][]>([]);
@@ -127,7 +137,6 @@ export default function Map({
       return;
     }
 
-
     // Standard Great Circle Route
     const start = turf.point([depCoords.lon, depCoords.lat]);
     const end = turf.point([destCoords.lon, destCoords.lat]);
@@ -212,6 +221,22 @@ export default function Map({
           maxZoom={19}
         />
 
+        {Object.values(occupiedGates).map((gate) => (
+          <CircleMarker
+            key={`occupied-${gate.ref}`}
+            center={[gate.lat, gate.lon]}
+            radius={6}
+            color="yellow"
+            fillColor="yellow"
+            fillOpacity={0.8}
+            weight={1}
+          >
+            <Popup>
+              <strong>Occupied Stand: {gate.ref}</strong>
+            </Popup>
+          </CircleMarker>
+        ))}
+
         {!loading && route.length > 0 && (
           <Polyline
             positions={route}
@@ -255,31 +280,23 @@ export default function Map({
             </Marker>
           )}
 
-        {/* Render All Gates */}
-        {allGates.map((gate, index) =>
-          gate.lat !== undefined && gate.lon !== undefined ? (
-            <CircleMarker
-              key={`gate-${
-                gate.ref !== "Unknown" ? gate.ref : `unknown-${index}`
-              }`}
-              center={[gate.lat, gate.lon]}
-              radius={occupiedGates[gate.ref] ? 7 : 5} // Bigger if occupied
-              color={occupiedGates[gate.ref] ? "red" : "green"}
-              fillColor={occupiedGates[gate.ref] ? "red" : "green"}
-              fillOpacity={0.8}
-              weight={1.5}
-            >
-              <Popup>
-                <strong>
-                  Gate{" "}
-                  {gate.ref !== "Unknown" ? gate.ref : `Unknown #${index + 1}`}
-                </strong>
-                <br />
-                Status: {occupiedGates[gate.ref] ? "Occupied" : "Available"}
-              </Popup>
-            </CircleMarker>
-          ) : null
+        {/* Render Parking Stands */}
+        {gateLocation && assignedGate && (
+          <CircleMarker
+            key={`assigned-stand`}
+            center={[gateLocation.lat, gateLocation.lon]}
+            radius={7}
+            color="red"
+            fillColor="red"
+            fillOpacity={0.9}
+            weight={1.5}
+          >
+            <Popup>
+              <strong>Assigned Stand: {assignedGate}</strong>
+            </Popup>
+          </CircleMarker>
         )}
+
         {gateLocation &&
           gateLocation.lat !== undefined &&
           gateLocation.lon !== undefined && (
