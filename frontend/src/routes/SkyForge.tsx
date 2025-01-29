@@ -193,7 +193,7 @@ const SkyForgeLanding: React.FC = () => {
 
         <p className="text-lg text-gray-400 mt-12">
           MRC is currently under early development, and we’re working hard to bring
-          this technolgy to IVAO’s SO. Stay tuned for
+          this technolgy to IVAO’s SO as a <strong>3rd party app</strong>, this is NOT officially supported by IVAO. Stay tuned for
           updates!
         </p>
       </motion.div>
