@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { login } from "../services/authServices";
 import { useNavigate } from "react-router-dom";
-import Footer from "../components/Footer"; // Importing the Footer component
+import Footer from "../components/Footer"; 
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -11,14 +11,16 @@ const Login = () => {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(""); 
         try {
-            const response = await login(email, password);
-            localStorage.setItem("token", response.data.token);
-            navigate("/dashboard");
-        } catch (err: any) {
-            setError(err.response?.data?.message || "Login failed");
+            await login(email, password);
+            navigate("/dashboard"); 
+        } catch (err) {
+            console.error(" Frontend Login Error:", err);
+            setError("Login failed: " + (err as Error).message);
         }
     };
+    
 
     return (
         <div

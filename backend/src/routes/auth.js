@@ -54,21 +54,18 @@ router.post("/login", async (req, res) => {
         });
 
         if (!user) {
-            console.log("❌ User not found:", email);
             return res.status(400).json({ message: "Invalid email or password" });
         }
 
         // Compare passwords
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            console.log("❌ Incorrect password for:", email);
             return res.status(400).json({ message: "Invalid email or password" });
         }
 
         // Generate JWT token
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
-        console.log("✅ Login Successful:", email);
         res.json({ message: "Login successful", token });
 
     } catch (error) {
