@@ -231,7 +231,7 @@ const SkyForgeLanding: React.FC = () => {
           valuable to us as we continue to improve and expand its capabilities.
         </p>
         <motion.a
-          href="/landingpage"
+          href="/maintancepage"
           className="px-6 py-3 text-lg font-semibold text-white bg-gradient-to-r from-red-500 to-yellow-400 hover:scale-105 transition-all duration-300 rounded-lg shadow-lg"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

@@ -14,6 +14,7 @@ import Career from "./routes/Career";
 import Register from "./routes/Register";
 import Login from "./routes/Login";
 import Dashboard from "./routes/Dashboard";
+import MaintenancePage  from "./routes/runwaylink/MaintenancePage";
 
 
 import { useEffect } from "react";
@@ -45,6 +46,7 @@ function RoutesWithTransition() {
       <Route path="/landingpage" element={<LandingPage />} />
       <Route path="/career" element={<Career />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/maintancepage" element={<MaintenancePage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/select-airport" element={<AirportSelection />} />
