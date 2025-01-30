@@ -159,41 +159,34 @@ export default function CallsignInput() {
     aircraftType: string,
     departureICAO: string
   ): Promise<void> => {
-    console.log("Departure ICAO:", departureICAO);
     if (!arrivalICAO || arrivalICAO === "Unknown") {
       console.warn(`⚠ Invalid arrival ICAO for ${callsign}`);
       setAssignedGate("Invalid flight plan destination.");
       setGateLocation(null);
       return;
     }
-
+  
     if (arrivalICAO !== airportICAO) {
       console.warn(`⚠ Aircraft ${callsign} is NOT arriving at ${airportICAO}`);
       setAssignedGate("Not arriving at this airport.");
       setGateLocation(null);
       return;
     }
-
-    const parkingStands: Gate[] = await fetchParkingStandsFromOSM(arrivalICAO);
-    if (!parkingStands || parkingStands.length === 0) {
-      console.warn(`⚠ No parking stands found at ${arrivalICAO}.`);
-      setAssignedGate("No parking stands found.");
+  
+    const gates: Gate[] = await fetchParkingStandsFromOSM(arrivalICAO);
+    if (!gates || gates.length === 0) {
+      console.warn(`⚠ No gates found at ${arrivalICAO}.`);
+      setAssignedGate("No gates found.");
       setGateLocation(null);
       return;
     }
-
-    setAllGates(parkingStands);
-
-    const airline = callsign.substring(0, 3).toUpperCase();
-
-    // Ensure every stand has a valid `size`
-    parkingStands.forEach((stand) => {
-      if (!stand.size) {
-        stand.size = stand.type?.includes("heavy") ? "wide" : "narrow";
-      }
-    });
-
-    // Define Aircraft Categories (use the correct categories for your use case)
+  
+    setAllGates(gates);
+    console.log(`Checking gates based on departure: ${departureICAO}`);
+    // Extract airline code from callsign
+    const airlineCode = callsign.substring(0, 3).toUpperCase();
+  
+    // Define Aircraft Categories
     const aircraftCategories: { [key: string]: string } = {
       A320: "narrow",
       A319: "narrow",
@@ -209,60 +202,50 @@ export default function CallsignInput() {
       E190: "regional",
       E175: "regional",
     };
-
+  
     const category = aircraftCategories[aircraftType] || "narrow";
-
-    // Filter stands based on aircraft type and size category
-    let eligibleStands = parkingStands.filter(
-      (stand) => stand.size === category
-    );
-
-    if (eligibleStands.length === 0) {
-      console.warn(
-        `⚠ No available stands matching aircraft size: ${category}. Expanding criteria.`
-      );
-      // Expand criteria if no exact match
-      eligibleStands = parkingStands.filter(
-        (stand) =>
-          (category === "narrow" && stand.size === "wide") ||
-          (category === "regional" && stand.size === "narrow")
+  
+    // Filter gates based on aircraft size category
+    let eligibleGates = gates.filter(gate => gate.size === category);
+  
+    if (eligibleGates.length === 0) {
+      console.warn(`⚠ No available gates for aircraft size: ${category}. Expanding criteria.`);
+      eligibleGates = gates.filter(gate =>
+        (category === "narrow" && gate.size === "wide") ||
+        (category === "regional" && gate.size === "narrow")
       );
     }
-
-    // Filter stands based on airline preference (if any)
-    let airlineSpecificStands = eligibleStands.filter(
-      (stand) => stand.operator && stand.operator.includes(airline)
-    );
-
-    if (airlineSpecificStands.length > 0) {
-      eligibleStands = airlineSpecificStands;
+  
+    // Apply airline restrictions
+    let airlineSpecificGates = eligibleGates.filter(gate => gate.operator && gate.operator.includes(airlineCode));
+  
+    if (airlineSpecificGates.length > 0) {
+      eligibleGates = airlineSpecificGates;
     }
-
-    // Now that we've filtered stands based on criteria, we should prioritize based on gate availability
-    const availableStand = getNextGate(
-      eligibleStands.filter(
-        (stand) =>
-          !Object.values(occupiedGates).some((g) => g.ref === stand.ref)
-      )
+  
+    // Get next available gate
+    const availableGate = getNextGate(
+      eligibleGates.filter(gate => !Object.values(occupiedGates).some(g => g.ref === gate.ref))
     );
-
-    if (!availableStand) {
-      console.warn("⚠ No available stands matching criteria.");
-      setAssignedGate("All stands are occupied.");
+  
+    if (!availableGate) {
+      console.warn("⚠ No available gates matching criteria.");
+      setAssignedGate("All gates are occupied.");
       setGateLocation(null);
       return;
     }
-
-    setOccupiedGates((prev) => ({
+  
+    setOccupiedGates(prev => ({
       ...prev,
-      [callsign]: availableStand, // Retain previous assignments
+      [callsign]: availableGate,
     }));
-
-    setAssignedGate(`Stand ${availableStand.ref}`);
-    setGateLocation({ lat: availableStand.lat, lon: availableStand.lon });
-
-    console.log(`✅ Assigned stand ${availableStand.ref} to ${callsign}`);
+  
+    setAssignedGate(`Gate ${availableGate.ref}`);
+    setGateLocation({ lat: availableGate.lat, lon: availableGate.lon });
+  
+    console.log(`✅ Assigned gate ${availableGate.ref} to ${callsign}`);
   };
+  
 
   const [activeAircraft, setActiveAircraft] = useState<{
     [key: string]: boolean;
@@ -332,47 +315,38 @@ export default function CallsignInput() {
   };
 
   // Fetches available gates at the airport
-  const fetchParkingStandsFromOSM = async (
-    airportICAO: string
-  ): Promise<Gate[]> => {
+  const fetchParkingStandsFromOSM = async (airportICAO: string): Promise<Gate[]> => {
     try {
       const coordinates = await fetchCoordinates(airportICAO);
       if (!coordinates) {
         console.error(`No coordinates found for ${airportICAO}`);
         return [];
       }
-
+  
       const { lat, lon } = coordinates;
-
-      console.log(
-        `📡 Fetching parking stands for ${airportICAO} at [${lat}, ${lon}]`
-      );
-
+      console.log(`📡 Fetching gates for ${airportICAO} at [${lat}, ${lon}]`);
+  
+      // Modified Overpass Query to Fetch Only Gates
       const overpassQuery = `
-            [out:json];
-            (
-                node["aeroway"="parking_position"](around:5000, ${lat}, ${lon});
-                node["aeroway"="gate"](around:5000, ${lat}, ${lon});
-            );
-            out body;
-        `;
-
-      const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(
-        overpassQuery
-      )}`;
+        [out:json];
+        (
+          node["aeroway"="gate"](around:5000, ${lat}, ${lon});
+        );
+        out body;
+      `;
+  
+      const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
       console.log(`🔗 Overpass Query URL: ${overpassUrl}`);
-
+  
       const response = await axios.get(overpassUrl, { timeout: 10000 });
-
+  
       if (!response.data?.elements?.length) {
-        console.warn(`⚠ No parking stands found for ${airportICAO}.`);
+        console.warn(`⚠ No gates found for ${airportICAO}.`);
         return [];
       }
-
-      console.log(
-        `✅ Found ${response.data.elements.length} parking stands at ${airportICAO}`
-      );
-
+  
+      console.log(`✅ Found ${response.data.elements.length} gates at ${airportICAO}`);
+  
       return response.data.elements
         .map((p: any) => ({
           ref: p.tags?.ref ?? p.id ?? "Unknown",
@@ -380,16 +354,11 @@ export default function CallsignInput() {
           lon: p.lon || (p.center?.lon ?? null),
           operator: p.tags?.operator || null,
           type: p.tags?.stand_type || "standard",
-          size:
-            p.tags?.size ||
-            (p.tags?.stand_type?.includes("heavy") ? "wide" : "narrow"),
+          size: p.tags?.size || (p.tags?.stand_type?.includes("heavy") ? "wide" : "narrow"),
         }))
-        .filter((stand: Gate) => stand.lat !== null && stand.lon !== null); // Ensure valid coordinates
+        .filter((gate: Gate) => gate.lat !== null && gate.lon !== null); // Ensure valid coordinates
     } catch (error) {
-      console.error(
-        `❌ Error fetching parking stands for ${airportICAO}:`,
-        error
-      );
+      console.error(`❌ Error fetching gates for ${airportICAO}:`, error);
       return [];
     }
   };

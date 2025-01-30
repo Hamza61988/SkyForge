@@ -220,21 +220,21 @@ export default function Map({
           maxZoom={19}
         />
 
-        {Object.values(occupiedGates).map((gate) => (
-          <CircleMarker
-            key={`occupied-${gate.ref}`}
-            center={[gate.lat, gate.lon]}
-            radius={6}
-            color="yellow"
-            fillColor="yellow"
-            fillOpacity={0.8}
-            weight={1}
-          >
-            <Popup>
-              <strong>Occupied Stand: {gate.ref}</strong>
-            </Popup>
-          </CircleMarker>
-        ))}
+{Object.values(occupiedGates).map(gate => (
+  <CircleMarker
+    key={`occupied-${gate.ref}`}
+    center={[gate.lat, gate.lon]}
+    radius={6}
+    color="yellow"
+    fillColor="yellow"
+    fillOpacity={0.8}
+    weight={1}
+  >
+    <Popup>
+      <strong>Occupied Gate: {gate.ref}</strong>
+    </Popup>
+  </CircleMarker>
+))}
 
         {!loading && route.length > 0 && (
           <Polyline
@@ -281,20 +281,20 @@ export default function Map({
 
         {/* Render Parking Stands */}
         {gateLocation && assignedGate && (
-          <CircleMarker
-            key={`assigned-stand`}
-            center={[gateLocation.lat, gateLocation.lon]}
-            radius={7}
-            color="red"
-            fillColor="red"
-            fillOpacity={0.9}
-            weight={1.5}
-          >
-            <Popup>
-              <strong>Assigned Stand: {assignedGate}</strong>
-            </Popup>
-          </CircleMarker>
-        )}
+  <CircleMarker
+    key={`assigned-gate`}
+    center={[gateLocation.lat, gateLocation.lon]}
+    radius={7}
+    color="red"
+    fillColor="red"
+    fillOpacity={0.9}
+    weight={1.5}
+  >
+    <Popup>
+      <strong>Assigned Gate: {assignedGate}</strong>
+    </Popup>
+  </CircleMarker>
+)}
 
         {gateLocation &&
           gateLocation.lat !== undefined &&

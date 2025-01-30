@@ -41,7 +41,6 @@ app.options("*", cors(corsOptions));
 app.use(express.json());
 app.use("/api/auth", authRoutes);
 
-
 const WHAZZUP_V2_URL = "https://api.ivao.aero/v2/tracker/whazzup";
 
 const client_id = process.env.IVAO_CLIENT_ID;
