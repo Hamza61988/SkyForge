@@ -1,4 +1,8 @@
-const API_URL = "http://localhost:3000/api/auth"; 
+const API_URL = window.location.hostname === "localhost"
+  ? "http://localhost:3000/api/auth"  // Local development
+  : "https://skyforgehq.com/api/auth"; // Production
+
+export { API_URL };
 
 // ** Register Function**
 export const register = async (username: string, email: string, password: string) => {
