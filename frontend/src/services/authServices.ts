@@ -1,20 +1,50 @@
-import axios from "axios";
+const API_URL = "http://localhost:3000/api/auth"; 
 
-const API_URL = "http://localhost:3000/api/auth"; // Change this for production
-
-// ✅ Register User
+// **🔹 Register Function**
 export const register = async (username: string, email: string, password: string) => {
-    return axios.post(`${API_URL}/register`, { username, email, password });
-};
-
-// ✅ Login User
-export const login = async (email: string, password: string) => {
-    return axios.post(`${API_URL}/login`, { email, password });
-};
-
-// ✅ Fetch Dashboard Data (Protected Route)
-export const fetchDashboard = async (token: string) => {
-    return axios.get(`${API_URL}/dashboard`, {
-        headers: { Authorization: `Bearer ${token}` },
+    const response = await fetch(`${API_URL}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password }),
     });
+
+    if (!response.ok) throw new Error("Registration failed");
+    return response.json();
+};
+
+// **🔹 Login Function**
+export const login = async (email: string, password: string) => {
+    const response = await fetch(`${API_URL}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) throw new Error("Login failed");
+
+    const data = await response.json();
+    localStorage.setItem("token", data.token); // Save token
+    return data;
+};
+
+// **🔹 Fetch Dashboard (Protected Route)**
+export const fetchDashboard = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("No token found");
+
+    const response = await fetch(`${API_URL}/dashboard`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+        },
+    });
+
+    if (!response.ok) throw new Error("Unauthorized");
+    return response.json();
+};
+
+// **🔹 Logout Function**
+export const logout = () => {
+    localStorage.removeItem("token");
 };

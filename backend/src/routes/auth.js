@@ -41,19 +41,38 @@ router.post("/login", async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        // Validate input
+        if (!email || !password) {
+            return res.status(400).json({ message: "Missing email or password" });
+        }
+
+        console.log("Login Request Received:", { email });
+
         // Find user by email
-        const user = await prisma.user.findUnique({ where: { email } });
-        if (!user) return res.status(400).json({ message: "Invalid email or password" });
+        const user = await prisma.user.findUnique({
+            where: { email: email.trim() },  // Ensure email is trimmed and not undefined
+        });
+
+        if (!user) {
+            console.log("❌ User not found:", email);
+            return res.status(400).json({ message: "Invalid email or password" });
+        }
 
         // Compare passwords
         const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) return res.status(400).json({ message: "Invalid email or password" });
+        if (!isPasswordValid) {
+            console.log("❌ Incorrect password for:", email);
+            return res.status(400).json({ message: "Invalid email or password" });
+        }
 
         // Generate JWT token
-        const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: "7d" });
+        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
+        console.log("✅ Login Successful:", email);
         res.json({ message: "Login successful", token });
+
     } catch (error) {
+        console.error("❌ Error Logging In:", error.message);
         res.status(500).json({ message: "Error logging in", error: error.message });
     }
 });

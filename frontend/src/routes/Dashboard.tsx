@@ -1,35 +1,27 @@
-import { useEffect, useState } from "react";
-import { fetchDashboard } from "../services/authServices";
+import { useState, useEffect } from "react";
+import { fetchDashboard, logout } from "../services/authServices";
 import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
     const [user, setUser] = useState<any>(null);
-    const [error] = useState("");
     const navigate = useNavigate();
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            navigate("/login"); // Redirect if not logged in
-            return;
-        }
-
-        fetchDashboard(token)
-            .then((res) => setUser(res.data.user))
-            .catch(() => {
-                localStorage.removeItem("token"); // Clear invalid token
+        const loadUser = async () => {
+            try {
+                const data = await fetchDashboard();
+                setUser(data.user);
+            } catch {
                 navigate("/login");
-            });
+            }
+        };
+        loadUser();
     }, [navigate]);
 
     return (
-        <div>
-            <h2>Dashboard</h2>
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            {user ? <p>Welcome, {user.username}!</p> : <p>Loading...</p>}
-            <button onClick={() => { localStorage.removeItem("token"); navigate("/login"); }}>
-                Logout
-            </button>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
+            <h2 className="text-3xl font-bold">Welcome, {user?.username}</h2>
+            <button onClick={() => { logout(); navigate("/login"); }} className="mt-4 bg-red-600 hover:bg-red-700 p-2 rounded">Logout</button>
         </div>
     );
 };
