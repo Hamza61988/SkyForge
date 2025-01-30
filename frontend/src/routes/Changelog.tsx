@@ -13,7 +13,7 @@ const Changelog: React.FC = () => {
     <div className="flex flex-col min-h-screen bg-black text-white">
       <Header />
       <div className="flex-grow flex items-center justify-center">
-        <p className="text-xl">Redirecting...</p>
+        <p className="text-xl">Redirecting....</p>
       </div>
       <Footer />
     </div>
