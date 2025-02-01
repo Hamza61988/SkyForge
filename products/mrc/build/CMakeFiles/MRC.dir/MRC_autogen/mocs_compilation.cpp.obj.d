@@ -380,4 +380,39 @@ CMakeFiles/MRC.dir/MRC_autogen/mocs_compilation.cpp.obj: \
  M:/Qt/6.8.1/mingw_64/include/QtWidgets/qtabwidget.h \
  M:/Qt/6.8.1/mingw_64/include/QtCore/QStringList \
  M:/Qt/6.8.1/mingw_64/include/QtCore/qstringlist.h \
+ M:/Qt/6.8.1/mingw_64/include/QtGui/QMouseEvent \
+ M:/Qt/6.8.1/mingw_64/include/QtGui/qevent.h \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/qcoreevent.h \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/qiodevice.h \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/qurl.h \
+ M:/Qt/6.8.1/mingw_64/include/QtGui/qeventpoint.h \
+ M:/Qt/6.8.1/mingw_64/include/QtGui/qvector2d.h \
+ M:/Qt/6.8.1/mingw_64/include/QtGui/qvectornd.h \
+ M:/Qt/6.8.1/mingw_64/include/QtGui/qpointingdevice.h \
+ M:/Qt/6.8.1/mingw_64/include/QtGui/qinputdevice.h \
+ M:/Qt/6.8.1/mingw_64/include/QtGui/qscreen.h \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/QList \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/qlist.h \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/QObject \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/qobject.h \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/QRect \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/qrect.h \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/QSize \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/qsize.h \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/QSizeF \
+ M:/Qt/6.8.1/mingw_64/include/QtGui/QTransform \
+ M:/Qt/6.8.1/mingw_64/include/QtGui/qtransform.h \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/qnativeinterface.h \
+ M:/Qt/6.8.1/mingw_64/include/QtGui/qscreen_platform.h \
+ M:/Qt/6.8.1/mingw_64/include/QtGui/qguiapplication.h \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/qcoreapplication.h \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/qdeadlinetimer.h \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/qelapsedtimer.h \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/qeventloop.h \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/qcoreapplication_platform.h \
+ M:/Qt/6.8.1/mingw_64/include/QtGui/qinputmethod.h \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/qlocale.h \
+ M:/Qt/6.8.1/mingw_64/include/QtGui/qguiapplication_platform.h \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/QPoint \
+ M:/Qt/6.8.1/mingw_64/include/QtCore/qpoint.h \
  M:/Qt/6.8.1/mingw_64/include/QtCore/qtmochelpers.h
