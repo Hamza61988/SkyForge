@@ -1,6 +1,6 @@
-# SKYFORGE_LOGUPDATER
+# SKYFORGE_LOGUPDATER_TEMPLATE
 
-This document serves as a **centralized log** for tracking important updates, changes, and maintenance actions performed on project-related documents, files, and assets.
+This document serves as a template of how a **centralized log** for tracking important updates, changes, and maintenance actions performed on project-related documents, files, and assets should be made. 
 
 ---
 
