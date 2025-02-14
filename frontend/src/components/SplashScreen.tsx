@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import SkyForgeLogo from "../assets/skyforgehq.svg";
-import starsBackground from "../assets/stars.png"; 
+import SkyForgeLogo from "/skyforgehq.svg";
+import starsBackground from "/stars.png"; 
 
 interface SplashScreenProps {
   onFinish: () => void;
