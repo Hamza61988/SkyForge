@@ -105,7 +105,7 @@ const SkyForgeLanding: React.FC = () => {
               desc: "A community hub for aviation, engineering, and science discussions among pilots and enthusiasts.",
             },
             {
-              title: "ATC Trainning Hub",
+              title: "ATC Training Hub",
               desc: "A progressive learning system for aspiring virtual and real-world ATC controllers, covering from basics to advanced radar control.",
             },
           ].map((item, index) => (
@@ -197,50 +197,6 @@ const SkyForgeLanding: React.FC = () => {
           updates!
         </p>
       </motion.div>
-
-      {/* Glowing Divider */}
-      <div className="relative w-full flex justify-center py-10">
-        <motion.div
-          className="w-40 h-[2px] bg-gradient-to-r from-blue-500 to-purple-500 opacity-80"
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          transition={{ duration: 1 }}
-        />
-      </div>
-
-      {/* Smooth Fade Effect */}
-      <div className="relative w-full h-32 bg-gradient-to-b from-transparent to-black" />
-
-      {/* RunwayLink Section - Enhanced Styling */}
-      <motion.div
-        className="py-24 px-16 text-center bg-gray-900 bg-opacity-90 backdrop-blur-lg rounded-xl shadow-lg mx-10"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 1.2 }}
-      >
-        <h2 className="text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-500">
-          Next in Line: RunwayLink
-        </h2>
-        <p className="text-lg max-w-3xl mx-auto text-gray-300 mb-6 leading-relaxed">
-          RunwayLink is designed to help IVAO ATC operators by enhancing gate
-          assignments and ground handling. Our mission is to streamline airport
-          operations with real-time data and automation.
-          <br />
-          <br />
-          This is an early version, so expect some bugs! Your feedback is
-          valuable to us as we continue to improve and expand its capabilities.
-        </p>
-        <motion.a
-          href="/landingpage"
-          className="px-6 py-3 text-lg font-semibold text-white bg-gradient-to-r from-red-500 to-yellow-400 hover:scale-105 transition-all duration-300 rounded-lg shadow-lg"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.8 }}
-        >
-          Learn More About RunwayLink
-        </motion.a>
-      </motion.div>
-
       <Footer />
     </div>
   );
